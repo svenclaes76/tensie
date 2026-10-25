@@ -1,0 +1,31 @@
+node_modules
+
+# Output
+.output
+.netlify
+.wrangler
+/.svelte-kit
+/build
+/dev-dist
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Playwright
+test-results
+playwright-report
+
+# Real health data never goes into git
+Bloeddruk*.xlsx
+*.real.xlsx
+backups/

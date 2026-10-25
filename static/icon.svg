@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+	<!-- Placeholder app icon: replace with final artwork, then run `npm run icons`. -->
+	<rect width="512" height="512" fill="#1F6F66"/>
+	<path d="M256 400 C 120 310 96 240 96 192 a 80 80 0 0 1 160 -16 a 80 80 0 0 1 160 16 c 0 48 -24 118 -160 208 z" fill="#F6F7F5"/>
+	<path d="M150 230 h 60 l 22 -46 l 36 96 l 24 -50 h 70" fill="none" stroke="#1F6F66" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
