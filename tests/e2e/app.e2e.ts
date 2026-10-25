@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test('app shell loads in Dutch', async ({ page }) => {
 	await page.goto('/');
-	await expect(page.getByRole('heading', { name: 'Tensie' })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Nieuwe meting' })).toBeVisible();
 	await expect(page.locator('html')).toHaveAttribute('lang', 'nl-BE');
 });
 
@@ -44,9 +44,9 @@ test('starts offline once the service worker is installed (N1)', async ({ page, 
 
 	await context.setOffline(true);
 	await page.reload();
-	await expect(page.getByRole('heading', { name: 'Tensie' })).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Nieuwe meting' })).toBeVisible();
 
-	// Deep links fall back to the precached app shell too.
-	await page.goto('/lijst');
-	await expect(page.locator('html')).toHaveAttribute('lang', 'nl-BE');
+	// Deep links fall back to the precached app shell too, and the screen works offline.
+	await page.goto('/list');
+	await expect(page.getByRole('heading', { name: 'Metingen', level: 1 })).toBeVisible();
 });

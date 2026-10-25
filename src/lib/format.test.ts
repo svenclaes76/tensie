@@ -9,6 +9,7 @@ import {
 	formatDayLabel,
 	formatMonth,
 	formatShortDay,
+	formatWeekdayDate,
 	formatDecimal,
 	formatTime
 } from './format';
@@ -98,5 +99,13 @@ describe('addDays', () => {
 		expect(addDays('2026-10-25', -6)).toBe('2026-10-19');
 		expect(addDays('2025-12-31', 1)).toBe('2026-01-01');
 		expect(addDays('2028-02-28', 1)).toBe('2028-02-29');
+	});
+});
+
+describe('formatWeekdayDate', () => {
+	it('gives weekday, day and month, and the year only when it differs', () => {
+		expect(formatWeekdayDate('2026-10-25', '2026-10-25')).toBe('zo 25 okt');
+		expect(formatWeekdayDate('2026-01-05', '2026-10-25')).toBe('ma 5 jan');
+		expect(formatWeekdayDate('2025-10-10', '2026-10-25')).toBe('vr 10 okt 2025');
 	});
 });

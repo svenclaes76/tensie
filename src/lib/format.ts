@@ -83,6 +83,14 @@ export function formatMonth(isoMonth: string): string {
 	return `${name[0].toUpperCase()}${name.slice(1)} ${year}`;
 }
 
+/** "zo 25 okt", with the year added when it is not the current one: "vr 10 okt 2025". */
+export function formatWeekdayDate(isoDate: string, today: string): string {
+	const [year, month, day] = isoDate.split('-').map(Number);
+	const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+	const yearPart = isoDate.slice(0, 4) === today.slice(0, 4) ? '' : ` ${year}`;
+	return `${WEEKDAYS[weekday]} ${day} ${MONTHS[month - 1]}${yearPart}`;
+}
+
 /** "25 okt", or "25 okt 2025" with the year. */
 function dayMonth(isoDate: string, withYear: boolean): string {
 	const [year, month, day] = isoDate.split('-').map(Number);
