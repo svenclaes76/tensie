@@ -250,4 +250,15 @@ describe('saveSettings (T1, T2, T5)', () => {
 		).rejects.toThrow(RangeError);
 		expect(await db.settings.count()).toBe(0);
 	});
+
+	it('stores the name and birth year for the report (E1)', async () => {
+		await saveSettings(db, { patientName: '  Sven Claes ', birthYear: 1976 }, NOW);
+		expect(await getSettings(db)).toMatchObject({ patientName: 'Sven Claes', birthYear: 1976 });
+		await saveSettings(db, { patientName: '  ' }, NOW);
+		expect(await getSettings(db)).not.toHaveProperty('patientName');
+	});
+
+	it.each([1899, 2027, 1976.5])('refuses birth year %d', async (birthYear) => {
+		await expect(saveSettings(db, { birthYear }, NOW)).rejects.toThrow(RangeError);
+	});
 });

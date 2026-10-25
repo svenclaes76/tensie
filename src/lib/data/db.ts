@@ -33,6 +33,8 @@ export interface Reading extends SyncedRow {
 
 export interface Settings extends SyncedRow {
 	timeZone: string;
+	/** For the report to the doctor (E1). */
+	patientName?: string;
 	birthYear?: number;
 	thresholds: Thresholds;
 	dayPartWindows: DayPartWindows;

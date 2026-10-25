@@ -14,6 +14,14 @@ export interface EffectiveSettings {
 	timeZone: string;
 	thresholds: Thresholds;
 	dayPartWindows: DayPartWindows;
+	/** Shown on the report (E1). */
+	patientName?: string;
+	birthYear?: number;
+}
+
+/** A birth year the report accepts: a whole year from 1900 up to this one. */
+export function isValidBirthYear(year: number, now: Date = new Date()): boolean {
+	return Number.isInteger(year) && year >= 1900 && year <= now.getFullYear();
 }
 
 /**
@@ -31,7 +39,9 @@ export async function getSettings(db: TensieDb): Promise<EffectiveSettings> {
 	return {
 		timeZone: live?.timeZone ?? deviceTimeZone(),
 		thresholds: live?.thresholds ?? DEFAULT_THRESHOLDS,
-		dayPartWindows: live?.dayPartWindows ?? DEFAULT_DAY_PART_WINDOWS
+		dayPartWindows: live?.dayPartWindows ?? DEFAULT_DAY_PART_WINDOWS,
+		...(live?.patientName ? { patientName: live.patientName } : {}),
+		...(live?.birthYear ? { birthYear: live.birthYear } : {})
 	};
 }
 
@@ -48,9 +58,13 @@ export async function saveSettings(
 		throw new RangeError('Invalid thresholds');
 	if (changes.dayPartWindows && validateDayPartWindows(changes.dayPartWindows).length > 0)
 		throw new RangeError('Invalid day-part windows');
+	if (changes.birthYear !== undefined && !isValidBirthYear(changes.birthYear, now))
+		throw new RangeError('Invalid birth year');
 
 	return db.transaction('rw', db.settings, async () => {
 		const next: EffectiveSettings = { ...(await getSettings(db)), ...changes };
+		// An empty name is no name.
+		if (next.patientName !== undefined) next.patientName = next.patientName.trim() || undefined;
 		const row: Settings = {
 			id: SETTINGS_ID,
 			...next,

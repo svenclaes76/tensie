@@ -204,6 +204,7 @@
 
 		<section class="card links">
 			<a href="/import">Importeren uit Excel<span aria-hidden="true">›</span></a>
+			<a href="/export">Exporteren en rapport<span aria-hidden="true">›</span></a>
 		</section>
 
 		<p class="status" role="status">{status}</p>
@@ -364,6 +365,10 @@
 		padding: 0;
 		gap: 0;
 		overflow: hidden;
+	}
+
+	.links a + a {
+		border-top: 1px solid var(--line);
 	}
 
 	.links a {

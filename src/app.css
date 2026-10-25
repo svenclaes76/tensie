@@ -103,3 +103,16 @@ textarea {
 	font-weight: 700;
 	cursor: pointer;
 }
+
+/* E1: the report prints on A4; app chrome is hidden per page with .no-print. */
+@page {
+	size: A4;
+	margin: 15mm;
+}
+
+@media print {
+	:root,
+	body {
+		background: #ffffff;
+	}
+}
