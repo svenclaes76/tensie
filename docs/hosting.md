@@ -17,6 +17,23 @@ readings: they live on the phone and in Supabase.
 - **CI** (`.github/workflows/ci.yml`): type check, unit tests and browser tests on every push and
   pull request.
 
+## Cloudflare (Workers & Pages)
+
+Cloudflare's dashboard now creates a **Worker** when you connect a repository, with
+`npx wrangler deploy` as its deploy command. `wrangler.jsonc` in the repo tells it to serve `build/`
+as static files with the single-page-app fallback; without that file, Wrangler tries to convert the
+app to server-side SvelteKit and fails. `static/_headers` works the same for Workers and Pages.
+
+For a Worker project:
+
+1. **Settings → Build**: build command `npm run build`, deploy command `npx wrangler deploy`
+   (the default), root directory empty.
+2. **Settings → Build → Variables and secrets** (build-time, not runtime): `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_PUBLISHABLE_KEY`. Node 24 is picked up automatically.
+3. Retry the deployment. The site appears at `https://tensie.<your-subdomain>.workers.dev`.
+
+A classic Pages project (the steps below) works too and does not use `wrangler.jsonc`.
+
 ## Cloudflare Pages
 
 1. Log in to the [Cloudflare dashboard](https://dash.cloudflare.com) → **Workers & Pages** →

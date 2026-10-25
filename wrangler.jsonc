@@ -1,0 +1,13 @@
+// Cloudflare Workers static assets: Tensie is a static single-page app, so no Worker code runs.
+// Having this file stops `wrangler deploy` from trying to convert the app to server-side SvelteKit.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tensie",
+	"compatibility_date": "2026-10-01",
+	"assets": {
+		// Output of `npm run build` (adapter-static).
+		"directory": "./build",
+		// Unknown addresses (/list, /reading/…) get the app's index.html, like the SPA fallback.
+		"not_found_handling": "single-page-application"
+	}
+}
