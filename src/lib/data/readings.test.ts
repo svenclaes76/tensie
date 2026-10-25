@@ -42,7 +42,9 @@ describe('addReading', () => {
 			source: 'manual',
 			createdAt: NOW.toISOString(),
 			updatedAt: NOW.toISOString(),
-			deleted: false
+			deleted: false,
+			// Marked by the sync hook until the server confirms it.
+			syncPending: 1
 		});
 		expect(await db.readings.get(reading.id)).toEqual(reading);
 	});

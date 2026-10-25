@@ -17,6 +17,7 @@ Personal blood pressure PWA for one user (the owner). Dutch-only interface. Full
 - **Local-first.** Every write goes to Dexie first; the UI reads only from Dexie. Sync with Supabase runs in the background and must never block entry.
 - **Sync model.** Every row has a UUID (generated on the client), `updated_at` and a `deleted` flag (soft delete). Push local changes, pull server changes since the last sync; last `updated_at` wins. A reading must never be silently lost or duplicated.
 - **Categories are calculated, never stored** (T4). Changing a threshold reclassifies everything.
+- **Sync implementation.** Local rows carry `syncPending` (set by Dexie hooks, cleared by `src/lib/sync/engine.ts`); the server decides last-change-wins and stamps `synced_at` (`supabase/migrations/`). Writes applied from the server go through `fromSync()` so they are not sent back. Setup: `docs/supabase-setup.md`.
 - **Supabase security.** RLS on every table, rows owned by `auth.uid()`. Only the public (anon/publishable) key may appear in client code. Never commit a service-role key or `.env`.
 
 ## Domain rules

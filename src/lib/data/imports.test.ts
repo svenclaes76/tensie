@@ -81,7 +81,8 @@ describe('saveImport', () => {
 				importId: result.importId,
 				createdAt: NOW.toISOString(),
 				updatedAt: NOW.toISOString(),
-				deleted: false
+				deleted: false,
+				syncPending: 1
 			},
 			expect.objectContaining({ measuredAt: '2026-01-18T20:00:00.000Z', systolic: 140 })
 		]);
@@ -94,7 +95,8 @@ describe('saveImport', () => {
 			importedAt: NOW.toISOString(),
 			readingCount: 2,
 			updatedAt: NOW.toISOString(),
-			deleted: false
+			deleted: false,
+			syncPending: 1
 		});
 	});
 

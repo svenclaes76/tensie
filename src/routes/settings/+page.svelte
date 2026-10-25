@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { CATEGORY_MARK } from '#lib/colors.js';
+	import SyncSettings from '#lib/components/SyncSettings.svelte';
 	import { db } from '#lib/data/db.js';
 	import { getSettings, saveSettings, type EffectiveSettings } from '#lib/data/settings.js';
 	import { DEFAULT_DAY_PART_WINDOWS, validateDayPartWindows } from '#lib/domain/dayPart.js';
@@ -201,6 +202,8 @@
 			{/if}
 			<p class="hint">Metingen daarbuiten tellen als ‘andere’.</p>
 		</section>
+
+		<SyncSettings />
 
 		<section class="card links">
 			<a href="/import">Importeren uit Excel<span aria-hidden="true">›</span></a>
