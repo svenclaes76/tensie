@@ -47,7 +47,7 @@ Reviewers needed for Tensie, a personal blood pressure PWA (SvelteKit + Dexie, S
 - Basic web security (OWASP Top 10)
 
 **What to review**
-- RLS enabled and correct on every table (readings, settings, tags)
+- RLS enabled and correct on every table (readings, settings and every other synced table)
 - Sign-ups disabled after the owner account exists
 - Only the public (anon/publishable) key in the front end; no service-role key anywhere in the app or repo
 - Auth settings: magic link, TOTP, session lifetime (P3)
