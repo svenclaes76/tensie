@@ -1,4 +1,4 @@
-import { toLocal } from '../dayPart';
+import { localMinuteKey } from '../dayPart';
 import type { ReadingLike } from '../types';
 import { checkValues, type ValueWarning } from '../validation';
 import { fromLocal } from '../zonedTime';
@@ -75,10 +75,6 @@ interface Candidate {
 	reading: ReadingDraft;
 	unit: Unit;
 	warnings: ValueWarning[];
-}
-
-function duplicateKey(date: string, minutes: number): string {
-	return `${date} ${minutes}`;
 }
 
 function parseValue(cell: Cell): number | RejectReason {
@@ -162,10 +158,7 @@ export function parseRows(
 	const existingKeys = new Set(
 		(options.existing ?? [])
 			.filter((r) => !r.deleted)
-			.map((r) => {
-				const local = toLocal(r.measuredAt, r.timeZone);
-				return duplicateKey(local.date, local.minutes);
-			})
+			.map((r) => localMinuteKey(r.measuredAt, r.timeZone))
 	);
 	const seenKeys = new Set<string>();
 	// Rows in sheet order; candidates are resolved once the sequence check below has run.
@@ -182,8 +175,7 @@ export function parseRows(
 			ordered.push(parsed);
 			continue;
 		}
-		const local = toLocal(parsed.reading.measuredAt, options.timeZone);
-		const key = duplicateKey(local.date, local.minutes);
+		const key = localMinuteKey(parsed.reading.measuredAt, options.timeZone);
 		if (existingKeys.has(key) || seenKeys.has(key)) {
 			ordered.push({
 				rowNumber: parsed.rowNumber,

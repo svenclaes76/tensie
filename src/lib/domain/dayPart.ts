@@ -51,6 +51,15 @@ export function toLocal(measuredAt: string, timeZone: string): LocalDateTime {
 	};
 }
 
+/**
+ * Local date and time to the minute ("2026-01-18 510"). Two readings with the same key are the
+ * same measurement for duplicate checks, even when stored in different time zones.
+ */
+export function localMinuteKey(measuredAt: string, timeZone: string): string {
+	const { date, minutes } = toLocal(measuredAt, timeZone);
+	return `${date} ${minutes}`;
+}
+
 /** Parses "HH:MM" (24-hour) to minutes since midnight; null when malformed. */
 export function parseTime(time: string): number | null {
 	const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(time);
