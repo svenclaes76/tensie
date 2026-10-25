@@ -1,0 +1,13 @@
+# Only used when hosting on Netlify instead of Cloudflare Pages (docs/hosting.md).
+[build]
+  command = "npm run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# Single-page app: every address is served by the app itself.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

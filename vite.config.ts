@@ -1,3 +1,4 @@
+import { loadEnv } from 'vite';
 import { defineConfig } from 'vitest/config';
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
@@ -5,6 +6,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // Revision for the precached fallback page; changes with every build.
 const buildId = Date.now().toString();
+
+// The only server the app talks to: the Supabase project from .env, if one is configured.
+const supabaseUrl = loadEnv(process.env.NODE_ENV ?? 'production', process.cwd(), 'VITE_').VITE_SUPABASE_URL;
+const supabaseOrigin = supabaseUrl ? (new URL(supabaseUrl).origin as `https://${string}.${string}`) : null;
 
 export default defineConfig({
 	plugins: [
@@ -15,7 +20,27 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 			// SPA: Dexie only exists in the browser, so every route is served by the fallback page.
-			adapter: adapter({ fallback: 'index.html' })
+			adapter: adapter({ fallback: 'index.html' }),
+			// Content Security Policy as a <meta> tag with hashes of SvelteKit's own inline scripts:
+			// nothing else may run, and data may only go to this site and the Supabase project.
+			// frame-ancestors cannot be set in a meta tag; static/_headers adds it.
+			csp: {
+				mode: 'hash',
+				directives: {
+					'default-src': ['self'],
+					'script-src': ['self'],
+					// Svelte sets a few inline styles (chart tooltip position).
+					'style-src': ['self', 'unsafe-inline'],
+					'img-src': ['self', 'data:', 'blob:'],
+					'font-src': ['self'],
+					'connect-src': supabaseOrigin ? ['self', supabaseOrigin] : ['self'],
+					'worker-src': ['self'],
+					'manifest-src': ['self'],
+					'object-src': ['none'],
+					'base-uri': ['self'],
+					'form-action': ['self']
+				}
+			}
 		}),
 		VitePWA({
 			// 'prompt' so a new version shows "Update beschikbaar" instead of reloading silently (N1).
