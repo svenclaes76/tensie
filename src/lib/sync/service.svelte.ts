@@ -2,6 +2,7 @@ import type { Session, SupabaseClient } from '@supabase/supabase-js';
 import { liveQuery } from 'dexie';
 import { db } from '../data/db';
 import { pendingCount, syncOnce } from './engine';
+import { isInactive, markActive, readLastActive } from './inactivity';
 import { supabaseRemote } from './supabaseRemote';
 
 // Only the public (publishable/anon) key may ever be here; see docs/supabase-setup.md.
@@ -19,7 +20,9 @@ export const sync = $state({
 	/** ISO instant of the last successful round. */
 	lastSyncedAt: null as string | null,
 	/** Local changes not yet confirmed by the server. */
-	pending: 0
+	pending: 0,
+	/** Logged out on this device after 30 days without use (P3). */
+	expired: false
 });
 
 const AFTER_CHANGE_MS = 2_000;
@@ -56,20 +59,33 @@ function useSession(session: Session | null) {
 	requestSync();
 }
 
+/** P3: logs this device out (others stay logged in) when it was not used for 30 days. */
+async function endIfInactive(supabase: SupabaseClient, now = new Date()) {
+	const { session } = (await supabase.auth.getSession()).data;
+	if (session && isInactive(readLastActive(), now)) {
+		await supabase.auth.signOut({ scope: 'local' });
+		sync.expired = true;
+	}
+	markActive(now);
+}
+
 /** Starts background sync (once): on start, back online, back in view, after changes, every 5 minutes. */
 export async function startSync() {
 	if (!syncConfigured || started) return;
 	started = true;
 	const supabase = await getClient();
+	// Check before listening, so an expired session never starts a sync round.
+	await endIfInactive(supabase);
 	supabase.auth.onAuthStateChange((_event, session) => useSession(session));
-	useSession((await supabase.auth.getSession()).data.session);
 
 	window.addEventListener('online', () => requestSync());
 	window.addEventListener('offline', () => {
 		if (userId) sync.status = 'offline';
 	});
 	document.addEventListener('visibilitychange', () => {
-		if (document.visibilityState === 'visible') requestSync();
+		if (document.visibilityState !== 'visible') return;
+		// An app left open in the background for weeks is checked when it comes back.
+		void endIfInactive(supabase).then(() => requestSync());
 	});
 	setInterval(() => requestSync(), EVERY_MS);
 	liveQuery(() => pendingCount(db)).subscribe((count) => {
@@ -101,6 +117,7 @@ async function runSync() {
 		await syncOnce(db, supabaseRemote(client, userId));
 		sync.status = 'idle';
 		sync.lastSyncedAt = new Date().toISOString();
+		markActive();
 	} catch {
 		sync.status = navigator.onLine ? 'error' : 'offline';
 		requestSync(RETRY_MS);
@@ -122,7 +139,11 @@ export type LoginError = 'wrong-credentials' | 'too-many-attempts' | 'failed';
 export async function signIn(email: string, password: string): Promise<LoginError | null> {
 	const supabase = await getClient();
 	const { error } = await supabase.auth.signInWithPassword({ email, password });
-	if (!error) return null;
+	if (!error) {
+		sync.expired = false;
+		markActive();
+		return null;
+	}
 	const code = (error as { code?: string; status?: number }).code;
 	const status = (error as { status?: number }).status;
 	if (code === 'invalid_credentials' || /invalid login credentials/i.test(error.message))

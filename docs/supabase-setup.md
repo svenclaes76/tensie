@@ -36,8 +36,11 @@ Email templates and SMTP are not needed.
 
 ## 4. Sessions and a second factor (P3)
 
-- Under **Authentication** → **Sessions**, set the inactivity timeout to 30 days if your plan offers
-  it.
+- **30 days of inactivity:** the app logs a device out itself when it was not used for more than
+  30 days, so nothing needs setting here. Paid plans can also set an inactivity timeout under
+  **Authentication** → **Sessions**, which ends the session on the server as well.
+- **A device lost or stolen:** under **Authentication** → **Users**, open your user and sign it out,
+  or change your password. That ends the sessions on all devices.
 - A second factor (TOTP, an authenticator app) can be enabled under **Multi-Factor**; the app does
   not ask for it yet.
 

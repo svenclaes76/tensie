@@ -9,10 +9,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const USER = '11111111-1111-4111-8111-111111111111';
 const auth = {
 	signInWithPassword: vi.fn(),
-	signOut: vi.fn(async () => ({ error: null })),
-	getSession: vi.fn(),
-	onAuthStateChange: vi.fn()
+	signOut: vi.fn(async () => {
+		session = null;
+		return { error: null };
+	}),
+	getSession: vi.fn(async () => ({ data: { session } })),
+	// Like supabase-js: reports the current session (INITIAL_SESSION) as soon as you listen.
+	onAuthStateChange: vi.fn((callback: (event: string, current: unknown) => void) => {
+		void Promise.resolve().then(() => callback('INITIAL_SESSION', session));
+		return { data: { subscription: { unsubscribe() {} } } };
+	})
 };
+let session: { user: { id: string; email: string } } | null = null;
+const storage = new Map<string, string>();
 const upserts: unknown[][] = [];
 
 vi.mock('@supabase/supabase-js', () => ({
@@ -40,6 +49,12 @@ beforeEach(() => {
 	vi.stubGlobal('navigator', { onLine: true });
 	vi.stubGlobal('window', { addEventListener: vi.fn() });
 	vi.stubGlobal('document', { addEventListener: vi.fn(), visibilityState: 'visible' });
+	vi.stubGlobal('localStorage', {
+		getItem: (key: string) => storage.get(key) ?? null,
+		setItem: (key: string, value: string) => storage.set(key, value)
+	});
+	storage.clear();
+	session = null;
 	upserts.length = 0;
 	for (const fn of Object.values(auth)) fn.mockClear();
 });
@@ -96,11 +111,9 @@ describe('sync service', () => {
 			diastolic: 86
 		});
 
-		auth.getSession.mockResolvedValue({
-			data: { session: { user: { id: USER, email: 'sven@example.be' } } }
-		});
+		session = { user: { id: USER, email: 'sven@example.be' } };
 		await service.startSync();
-		expect(service.sync.email).toBe('sven@example.be');
+		await vi.waitFor(() => expect(service.sync.email).toBe('sven@example.be'));
 
 		await vi.waitFor(() => expect(service.sync.status).toBe('idle'), { timeout: 5000 });
 		await vi.waitFor(() => expect(service.sync.lastSyncedAt).not.toBeNull(), { timeout: 5000 });
@@ -108,5 +121,39 @@ describe('sync service', () => {
 			expect.objectContaining({ user_id: USER, systolic: 138, diastolic: 86, measured_at: '2026-10-25T06:42:00.000Z' })
 		]);
 		expect((await db.readings.toArray())[0].syncPending).toBe(0);
+	});
+
+	it('logs this device out after more than 30 days without use (P3)', async () => {
+		const service = await loadService();
+		session = { user: { id: USER, email: 'sven@example.be' } };
+		storage.set('tensie.lastActiveAt', new Date(Date.now() - 31 * 86_400_000).toISOString());
+
+		await service.startSync();
+		expect(auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
+		await vi.waitFor(() => expect(service.sync.status).toBe('signed-out'));
+		expect(service.sync.expired).toBe(true);
+		expect(upserts).toEqual([]);
+		// The use is recorded again, so logging back in starts a fresh 30 days.
+		expect(Date.now() - Date.parse(storage.get('tensie.lastActiveAt')!)).toBeLessThan(5_000);
+	});
+
+	it('keeps a device logged in that was used within 30 days', async () => {
+		const service = await loadService();
+		session = { user: { id: USER, email: 'sven@example.be' } };
+		storage.set('tensie.lastActiveAt', new Date(Date.now() - 29 * 86_400_000).toISOString());
+
+		await service.startSync();
+		expect(auth.signOut).not.toHaveBeenCalled();
+		await vi.waitFor(() => expect(service.sync.email).toBe('sven@example.be'));
+		expect(service.sync.expired).toBe(false);
+	});
+
+	it('clears the notice after logging in again', async () => {
+		const service = await loadService();
+		service.sync.expired = true;
+		auth.signInWithPassword.mockResolvedValue({ error: null });
+		await service.signIn('sven@example.be', 'secret');
+		expect(service.sync.expired).toBe(false);
+		expect(storage.has('tensie.lastActiveAt')).toBe(true);
 	});
 });

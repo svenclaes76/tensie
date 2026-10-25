@@ -102,7 +102,7 @@ Readings are health data, so they get strong protection even though the app hold
 | --- | --- |
 | P1 | Data stored and processed only in the EU |
 | P2 | Encryption in transit (TLS 1.2+) and at rest |
-| P3 | Login with email and password through Supabase Auth; optional TOTP second factor; sessions expire after 30 days of inactivity |
+| P3 | Login with email and password through Supabase Auth; optional TOTP second factor; sessions expire after 30 days of inactivity (enforced per device by the app: the free Supabase plan has no server-side timeout) |
 | P4 | No third-party analytics, ads or tracking pixels |
 | P5 | Log of logins, exports, share-link creation and opens, kept 12 months |
 | P6 | Full export and delete-everything available in-app |

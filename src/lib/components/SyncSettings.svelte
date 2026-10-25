@@ -73,6 +73,12 @@
 	{#if !syncConfigured}
 		<p class="hint">Synchronisatie is niet ingesteld: je metingen staan alleen op dit toestel.</p>
 	{:else if sync.status === 'signed-out'}
+		{#if sync.expired}
+			<p class="notice" role="status">
+				Je was meer dan 30 dagen niet actief op dit toestel en bent daarom afgemeld. Je metingen staan
+				er nog; meld je opnieuw aan om verder te synchroniseren.
+			</p>
+		{/if}
 		<p class="hint">
 			Meld je aan om je metingen veilig te bewaren en op je andere toestellen te zien. Tot dan staan ze
 			alleen op dit toestel.
@@ -167,6 +173,13 @@
 
 	.password input {
 		flex: 1;
+	}
+
+	.notice {
+		padding: 10px 12px;
+		border-radius: 10px;
+		background: var(--warn-bg);
+		color: var(--warn-ink);
 	}
 
 	.error {
