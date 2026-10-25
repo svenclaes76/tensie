@@ -4,7 +4,7 @@ import { DEFAULT_DAY_PART_WINDOWS } from '../domain/dayPart';
 import { DEFAULT_THRESHOLDS } from '../domain/thresholds';
 import { createDb, type TensieDb } from './db';
 import { addReading, deleteReading, getReading, restoreReading, updateReading } from './readings';
-import { getSettings } from './settings';
+import { getSettings, saveSettings, SETTINGS_ID } from './settings';
 
 const NOW = new Date('2026-10-25T09:58:30Z');
 let db: TensieDb;
@@ -99,7 +99,7 @@ describe('getSettings', () => {
 			diastolic: { mild: 80, moderate: 95, severe: 105 }
 		};
 		await db.settings.add({
-			id: 's',
+			id: SETTINGS_ID,
 			timeZone: 'Europe/Lisbon',
 			thresholds,
 			dayPartWindows: DEFAULT_DAY_PART_WINDOWS,
@@ -203,5 +203,51 @@ describe('editing and deleting (C7)', () => {
 		const original = await addReading(db, INPUT, NOW);
 		await restoreReading(db, original.id, LATER);
 		expect((await db.readings.get(original.id))?.updatedAt).toBe(NOW.toISOString());
+	});
+});
+
+describe('saveSettings (T1, T2, T5)', () => {
+	const STRICTER = {
+		systolic: { mild: 130, moderate: 150, severe: 170 },
+		diastolic: { mild: 80, moderate: 95, severe: 105 }
+	};
+
+	it('creates the single settings record from the defaults', async () => {
+		const saved = await saveSettings(db, { thresholds: STRICTER }, NOW);
+		expect(saved).toMatchObject({ thresholds: STRICTER, dayPartWindows: DEFAULT_DAY_PART_WINDOWS });
+		expect(await db.settings.toArray()).toEqual([
+			expect.objectContaining({ id: SETTINGS_ID, thresholds: STRICTER, updatedAt: NOW.toISOString(), deleted: false })
+		]);
+		expect((await getSettings(db)).thresholds).toEqual(STRICTER);
+	});
+
+	it('updates only what changed and keeps one record', async () => {
+		await saveSettings(db, { thresholds: STRICTER }, NOW);
+		const windows = { morning: { start: '05:00', end: '10:00' }, evening: { start: '19:00', end: '23:00' } };
+		const later = new Date('2026-10-25T11:00:00Z');
+		await saveSettings(db, { dayPartWindows: windows }, later);
+		expect(await db.settings.count()).toBe(1);
+		expect(await getSettings(db)).toMatchObject({ thresholds: STRICTER, dayPartWindows: windows });
+		expect((await db.settings.get(SETTINGS_ID))?.updatedAt).toBe(later.toISOString());
+	});
+
+	it('refuses thresholds that do not rise or are implausible, and keeps the old ones', async () => {
+		await saveSettings(db, { thresholds: STRICTER }, NOW);
+		await expect(
+			saveSettings(db, { thresholds: { ...STRICTER, systolic: { mild: 150, moderate: 150, severe: 170 } } })
+		).rejects.toThrow(RangeError);
+		await expect(
+			saveSettings(db, { thresholds: { ...STRICTER, diastolic: { mild: 10, moderate: 95, severe: 105 } } })
+		).rejects.toThrow(RangeError);
+		expect((await getSettings(db)).thresholds).toEqual(STRICTER);
+	});
+
+	it('refuses overlapping day parts', async () => {
+		await expect(
+			saveSettings(db, {
+				dayPartWindows: { morning: { start: '04:00', end: '19:00' }, evening: { start: '18:00', end: '23:59' } }
+			})
+		).rejects.toThrow(RangeError);
+		expect(await db.settings.count()).toBe(0);
 	});
 });

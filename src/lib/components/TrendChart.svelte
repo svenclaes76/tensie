@@ -1,19 +1,13 @@
 <script lang="ts">
 	import type { ChartData } from '#lib/chart.js';
+	import { CATEGORY_MARK } from '#lib/colors.js';
 	import type { Category } from '#lib/domain/types.js';
 	import { CATEGORY_LABEL } from '#lib/texts.js';
 
 	let { data, label }: { data: ChartData; label: string } = $props();
 
-	// Dot colours by category, checked with the dataviz palette validator: CVD and
-	// normal-vision separation pass; amber is below 3:1 on white, which the category bands,
-	// the tooltip and the table view make up for.
-	const DOT: Record<Category, string> = {
-		normal: '#1F8A70',
-		mild: '#CC9A00',
-		moderate: '#C2410C',
-		severe: '#8F1D4F'
-	};
+	// The bands, tooltip and table view make up for amber's low contrast (see colors.ts).
+	const DOT = CATEGORY_MARK;
 	const BAND_FILL: Record<Category, string> = {
 		normal: '#EEF6F4',
 		mild: '#FDF6E5',

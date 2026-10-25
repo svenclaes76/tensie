@@ -42,14 +42,14 @@ describe('validateThresholds (T2)', () => {
 		]);
 	});
 
-	it('rejects non-integer and non-positive limits', () => {
+	it('rejects non-integer limits and limits outside the plausible range (C4)', () => {
 		expect(validateThresholds(withSystolic({ mild: 134.5 }))).toContainEqual({
 			kind: 'not-integer',
 			measure: 'systolic',
 			limit: 'mild'
 		});
 		expect(validateThresholds(withSystolic({ mild: 0 }))).toContainEqual({
-			kind: 'not-positive',
+			kind: 'out-of-range',
 			measure: 'systolic',
 			limit: 'mild'
 		});
@@ -58,5 +58,24 @@ describe('validateThresholds (T2)', () => {
 			measure: 'systolic',
 			limit: 'mild'
 		});
+	});
+
+	it.each([
+		['systolic', 'mild', 59, false],
+		['systolic', 'mild', 60, true],
+		['systolic', 'severe', 260, true],
+		['systolic', 'severe', 261, false],
+		['diastolic', 'mild', 29, false],
+		['diastolic', 'mild', 30, true],
+		['diastolic', 'severe', 160, true],
+		['diastolic', 'severe', 161, false]
+	] as const)('%s %s limit %i is in range: %s', (measure, limit, value, ok) => {
+		const base = {
+			systolic: { mild: 60, moderate: 140, severe: 200 },
+			diastolic: { mild: 30, moderate: 90, severe: 120 }
+		};
+		const thresholds = { ...base, [measure]: { ...base[measure], [limit]: value } };
+		const errors = validateThresholds(thresholds).filter((e) => e.kind === 'out-of-range');
+		expect(errors.length === 0).toBe(ok);
 	});
 });

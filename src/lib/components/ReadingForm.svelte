@@ -241,7 +241,6 @@
 					oninput={onSystolicInput}
 					inputmode="numeric"
 					pattern="[0-9]*"
-					maxlength={MAX_DIGITS}
 					autocomplete="off"
 					enterkeyhint="next"
 					onkeydown={(e) => {
@@ -264,7 +263,6 @@
 					oninput={onDiastolicInput}
 					inputmode="numeric"
 					pattern="[0-9]*"
-					maxlength={MAX_DIGITS}
 					autocomplete="off"
 					enterkeyhint="done"
 					aria-describedby="dia-cat"

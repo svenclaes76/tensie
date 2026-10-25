@@ -4,4 +4,5 @@
 	<p><a href="/new">Nieuwe meting</a></p>
 	<p><a href="/list">Metingen</a></p>
 	<p><a href="/import">Importeren</a></p>
+	<p><a href="/settings">Instellingen</a></p>
 </main>

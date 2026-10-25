@@ -62,6 +62,11 @@ test('keeps only digits, at most three', async ({ page }) => {
 	await expect(page.getByLabel('Bovendruk')).toHaveValue('14');
 	await page.getByLabel('Onderdruk').fill('8812');
 	await expect(page.getByLabel('Onderdruk')).toHaveValue('881');
+	// A pasted value with junk keeps its first three digits.
+	await page.getByLabel('Onderdruk').fill('8a8x');
+	await expect(page.getByLabel('Onderdruk')).toHaveValue('88');
+	await page.getByLabel('Bovendruk').fill('1a46');
+	await expect(page.getByLabel('Bovendruk')).toHaveValue('146');
 });
 
 test('asks for both values before saving', async ({ page }) => {
