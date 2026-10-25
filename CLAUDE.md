@@ -22,10 +22,10 @@ Personal blood pressure PWA for one user (the owner). Dutch-only interface. Full
 ## Domain rules
 
 - Units: store and show mmHg as integers.
-- Categories: `normaal`, `licht verhoogd`, `gemiddeld verhoogd`, `ernstig verhoogd`.
+- Categories (code → label): `normal` Normaal, `mild` Licht verhoogd, `moderate` Gemiddeld verhoogd, `severe` Ernstig verhoogd.
 - Default lower limits (inclusive): systolic 135 / 160 / 180, diastolic 85 / 100 / 110. A value equal to a limit belongs to that category.
 - Systolic (bovendruk) and diastolic (onderdruk) are classified separately and both shown; the reading's overall category is the higher of the two.
-- Day parts: ochtend 04:00–11:59, avond 18:00–23:59, otherwise "andere". Store the time zone with each reading.
+- Day parts (code → label): `morning` ochtend 04:00–11:59, `evening` avond 18:00–23:59, otherwise `other` (andere). Store the time zone with each reading.
 - Monthly average uses every reading in the month; fewer than 6 readings = "beperkte gegevens".
 - The app never diagnoses or advises. Keep the fixed note about contacting a doctor or 112.
 
@@ -47,11 +47,12 @@ Use `tests/fixtures/sample-import.xlsx` (synthetic data, same layout) in tests. 
 - Mobile-first from 360 px, tap targets ≥ 44 px, body text ≥ 16 px, WCAG 2.2 AA.
 - Belgian formats: dd/mm/jjjj, 24-hour time, decimal comma.
 - Category always shown as colour **and** text label.
-- Screens (designs on the Tensie design canvas): Home, Nieuwe meting, Lijst, Grafiek, Maandoverzicht, Instellingen, Importeren.
+- Screens (designs on the Tensie design canvas) and routes: Home `/`, Nieuwe meting `/new`, Lijst `/list`, Grafiek `/chart`, Maandoverzicht `/monthly`, Instellingen `/settings`, Importeren `/import`.
 - Colours: accent #1F6F66, ground #F6F7F5, ink #1B2421. Category badges: normaal #E3F1EE/#1D5E53, licht #FBEFD2/#6B4700, gemiddeld #FBE1D3/#8A2E0B, ernstig #9F1239/#FFFFFF. Font: Atkinson Hyperlegible.
 
 ## Working agreements
 
 - Write unit tests for classification, averages and import before or with the code; test every threshold boundary.
 - Keep domain logic (classification, averages, import parsing) in plain TypeScript modules under `src/lib/domain/`, free of Svelte and Dexie, so it is easy to test.
-- Code, comments and commits in English; UI text in Dutch.
+- Everything in code is English: identifiers, stored values, routes, comments and commits. Only text the user sees is Dutch, kept in label maps such as `src/lib/texts.ts`. Data that must match Dutch input (Excel header names) stays as it is.
+- Imports from `src/lib` use SvelteKit 3 subpath imports: `#lib/…/file.js`.

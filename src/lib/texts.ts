@@ -1,14 +1,20 @@
-import type { Category } from './domain/types';
+import type { Category, DayPart } from './domain/types';
 import { VALUE_RANGES, type ValueWarning } from './domain/validation';
 
 const { systolic, diastolic } = VALUE_RANGES;
 
 /** How a category is shown; always next to its colour (N4). */
 export const CATEGORY_LABEL: Record<Category, string> = {
-	normaal: 'Normaal',
-	'licht verhoogd': 'Licht verhoogd',
-	'gemiddeld verhoogd': 'Gemiddeld verhoogd',
-	'ernstig verhoogd': 'Ernstig verhoogd'
+	normal: 'Normaal',
+	mild: 'Licht verhoogd',
+	moderate: 'Gemiddeld verhoogd',
+	severe: 'Ernstig verhoogd'
+};
+
+export const DAY_PART_LABEL: Record<DayPart, string> = {
+	morning: 'ochtend',
+	evening: 'avond',
+	other: 'andere'
 };
 
 /** Why values need confirmation (C4), in plain Dutch. */

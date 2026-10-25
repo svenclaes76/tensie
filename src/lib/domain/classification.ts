@@ -9,10 +9,10 @@ export interface ReadingClassification {
 
 /** Classifies one value against inclusive lower limits: a value equal to a limit is in that category. */
 export function classifyValue(value: number, limits: CategoryLimits): Category {
-	if (value >= limits.ernstig) return 'ernstig verhoogd';
-	if (value >= limits.gemiddeld) return 'gemiddeld verhoogd';
-	if (value >= limits.licht) return 'licht verhoogd';
-	return 'normaal';
+	if (value >= limits.severe) return 'severe';
+	if (value >= limits.moderate) return 'moderate';
+	if (value >= limits.mild) return 'mild';
+	return 'normal';
 }
 
 export function maxCategory(a: Category, b: Category): Category {

@@ -40,7 +40,7 @@ export default defineConfig({
 				shortcuts: [
 					{
 						name: 'Nieuwe meting',
-						url: '/meting',
+						url: '/new',
 						icons: [{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
 					}
 				],

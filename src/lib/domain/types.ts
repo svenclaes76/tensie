@@ -1,18 +1,18 @@
 /** Categories from low to high; the order is used to pick the higher of two (H4). */
 export const CATEGORIES = [
-	'normaal',
-	'licht verhoogd',
-	'gemiddeld verhoogd',
-	'ernstig verhoogd'
+	'normal',
+	'mild',
+	'moderate',
+	'severe'
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
 
 /** Inclusive lower limits in mmHg for the three raised categories (T1). */
 export interface CategoryLimits {
-	licht: number;
-	gemiddeld: number;
-	ernstig: number;
+	mild: number;
+	moderate: number;
+	severe: number;
 }
 
 export interface Thresholds {
@@ -20,7 +20,7 @@ export interface Thresholds {
 	diastolic: CategoryLimits;
 }
 
-export type DayPart = 'ochtend' | 'avond' | 'andere';
+export type DayPart = 'morning' | 'evening' | 'other';
 
 /** A time-of-day window, both ends inclusive, as "HH:MM" in the reading's local time. */
 export interface TimeWindow {
@@ -29,8 +29,8 @@ export interface TimeWindow {
 }
 
 export interface DayPartWindows {
-	ochtend: TimeWindow;
-	avond: TimeWindow;
+	morning: TimeWindow;
+	evening: TimeWindow;
 }
 
 /** The fields the domain logic needs from a stored reading. */

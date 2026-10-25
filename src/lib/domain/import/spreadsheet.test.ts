@@ -87,7 +87,7 @@ describe('previewImport — sample-import.xlsx (Bloeddruk.xlsx layout)', () => {
 
 	it('puts every reading in the morning or evening slot (08:30 and 21:00 local)', () => {
 		const parts = readings(rows).map((r) => getDayPart(r.measuredAt, r.timeZone));
-		expect(new Set(parts)).toEqual(new Set(['ochtend', 'avond']));
+		expect(new Set(parts)).toEqual(new Set(['morning', 'evening']));
 	});
 
 	it('creates no duplicates when the same file is imported again', () => {

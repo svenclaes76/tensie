@@ -22,7 +22,7 @@ export interface Reading extends SyncedRow {
 	systolic: number;
 	/** mmHg, integer. */
 	diastolic: number;
-	arm?: 'links' | 'rechts';
+	arm?: 'left' | 'right';
 	note?: string;
 	sessionId?: string;
 	source: 'manual' | 'import';

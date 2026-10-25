@@ -4,11 +4,9 @@
 
 	/** Null shows a neutral "–" (no value yet). */
 	let { category, id }: { category: Category | null; id?: string } = $props();
-
-	const tone = $derived(category ? category.split(' ')[0] : 'none');
 </script>
 
-<span {id} class="badge {tone}">{category ? CATEGORY_LABEL[category] : '–'}</span>
+<span {id} class="badge {category ?? 'none'}">{category ? CATEGORY_LABEL[category] : '–'}</span>
 
 <style>
 	.badge {
@@ -25,22 +23,22 @@
 		color: var(--muted);
 	}
 
-	.normaal {
+	.normal {
 		background: #e3f1ee;
 		color: #1d5e53;
 	}
 
-	.licht {
+	.mild {
 		background: #fbefd2;
 		color: #6b4700;
 	}
 
-	.gemiddeld {
+	.moderate {
 		background: #fbe1d3;
 		color: #8a2e0b;
 	}
 
-	.ernstig {
+	.severe {
 		background: #9f1239;
 		color: #ffffff;
 	}

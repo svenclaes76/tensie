@@ -17,7 +17,7 @@
 		type EntryWarning
 	} from '#lib/entry.js';
 	import { formatDayLabel, formatTime } from '#lib/format.js';
-	import { MEDICAL_NOTE, VALUE_WARNING_TEXT } from '#lib/texts.js';
+	import { DAY_PART_LABEL, MEDICAL_NOTE, VALUE_WARNING_TEXT } from '#lib/texts.js';
 
 	const WARNING_TEXT: Record<EntryWarning, string> = {
 		...VALUE_WARNING_TEXT,
@@ -32,7 +32,7 @@
 
 	let systolicText = $state('');
 	let diastolicText = $state('');
-	let arm = $state<'links' | 'rechts' | null>(null);
+	let arm = $state<'left' | 'right' | null>(null);
 	let note = $state('');
 
 	// The time follows the clock until the user picks one (C1: defaults to now).
@@ -51,9 +51,9 @@
 
 	const systolicCategory = $derived(liveCategory(systolicText, thresholds.systolic));
 	const diastolicCategory = $derived(liveCategory(diastolicText, thresholds.diastolic));
-	// The fixed doctor/112 line appears as soon as either value is ernstig verhoogd.
+	// The fixed doctor/112 line appears as soon as either value is severe.
 	const showMedicalNote = $derived(
-		systolicCategory === 'ernstig verhoogd' || diastolicCategory === 'ernstig verhoogd'
+		systolicCategory === 'severe' || diastolicCategory === 'severe'
 	);
 
 	const today = $derived(toLocal(now.toISOString(), timeZone).date);
@@ -75,7 +75,7 @@
 		return [
 			formatDayLabel(chosen.date, today),
 			formatTime(chosen.minutes),
-			part === 'andere' ? null : part
+			part === 'other' ? null : DAY_PART_LABEL[part]
 		]
 			.filter(Boolean)
 			.join(' · ');
@@ -96,7 +96,7 @@
 		systolicText = sanitizeDigits(event.currentTarget.value);
 		event.currentTarget.value = systolicText;
 		warnings = [];
-		// Three digits typed: move on to onderdruk, so entry needs no extra tap.
+		// Three digits typed: move on to the diastolic field, so entry needs no extra tap.
 		if (systolicText.length === MAX_DIGITS && before.length < MAX_DIGITS) diastolicField?.focus();
 	}
 
@@ -119,7 +119,7 @@
 		warnings = [];
 	}
 
-	function toggleArm(side: 'links' | 'rechts') {
+	function toggleArm(side: 'left' | 'right') {
 		arm = arm === side ? null : side;
 	}
 
@@ -278,10 +278,10 @@
 		<fieldset>
 			<legend>Arm <span class="optional">(optioneel)</span></legend>
 			<div class="arms">
-				<button type="button" aria-pressed={arm === 'links'} onclick={() => toggleArm('links')}>
+				<button type="button" aria-pressed={arm === 'left'} onclick={() => toggleArm('left')}>
 					Links
 				</button>
-				<button type="button" aria-pressed={arm === 'rechts'} onclick={() => toggleArm('rechts')}>
+				<button type="button" aria-pressed={arm === 'right'} onclick={() => toggleArm('right')}>
 					Rechts
 				</button>
 			</div>

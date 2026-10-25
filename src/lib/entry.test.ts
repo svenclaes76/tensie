@@ -36,14 +36,14 @@ describe('liveCategory', () => {
 		expect(liveCategory('1', DEFAULT_THRESHOLDS.systolic)).toBeNull();
 		expect(liveCategory('14', DEFAULT_THRESHOLDS.systolic)).toBeNull();
 		expect(liveCategory('29', DEFAULT_THRESHOLDS.diastolic)).toBeNull();
-		expect(liveCategory('30', DEFAULT_THRESHOLDS.diastolic)).toBe('normaal');
+		expect(liveCategory('30', DEFAULT_THRESHOLDS.diastolic)).toBe('normal');
 	});
 
 	it('classifies at the inclusive limits, as the stored reading will be', () => {
-		expect(liveCategory('134', DEFAULT_THRESHOLDS.systolic)).toBe('normaal');
-		expect(liveCategory('135', DEFAULT_THRESHOLDS.systolic)).toBe('licht verhoogd');
-		expect(liveCategory('146', DEFAULT_THRESHOLDS.systolic)).toBe('licht verhoogd');
-		expect(liveCategory('110', DEFAULT_THRESHOLDS.diastolic)).toBe('ernstig verhoogd');
+		expect(liveCategory('134', DEFAULT_THRESHOLDS.systolic)).toBe('normal');
+		expect(liveCategory('135', DEFAULT_THRESHOLDS.systolic)).toBe('mild');
+		expect(liveCategory('146', DEFAULT_THRESHOLDS.systolic)).toBe('mild');
+		expect(liveCategory('110', DEFAULT_THRESHOLDS.diastolic)).toBe('severe');
 	});
 });
 

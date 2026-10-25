@@ -26,7 +26,7 @@ describe('addReading', () => {
 				timeZone: 'Europe/Brussels',
 				systolic: 146,
 				diastolic: 88,
-				arm: 'links',
+				arm: 'left',
 				note: '  na koffie '
 			},
 			NOW
@@ -37,7 +37,7 @@ describe('addReading', () => {
 			timeZone: 'Europe/Brussels',
 			systolic: 146,
 			diastolic: 88,
-			arm: 'links',
+			arm: 'left',
 			note: 'na koffie',
 			source: 'manual',
 			createdAt: NOW.toISOString(),
@@ -95,8 +95,8 @@ describe('getSettings', () => {
 
 	it('uses stored settings once they exist', async () => {
 		const thresholds = {
-			systolic: { licht: 130, gemiddeld: 150, ernstig: 170 },
-			diastolic: { licht: 80, gemiddeld: 95, ernstig: 105 }
+			systolic: { mild: 130, moderate: 150, severe: 170 },
+			diastolic: { mild: 80, moderate: 95, severe: 105 }
 		};
 		await db.settings.add({
 			id: 's',

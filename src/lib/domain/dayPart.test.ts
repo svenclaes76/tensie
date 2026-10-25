@@ -17,55 +17,55 @@ function brusselsWinter(time: string, day = '2026-01-15'): string {
 
 describe('getDayPart — default window boundaries (T5)', () => {
 	it.each([
-		['00:00', 'andere'],
-		['03:59', 'andere'],
-		['04:00', 'ochtend'],
-		['11:59', 'ochtend'],
-		['12:00', 'andere'],
-		['17:59', 'andere'],
-		['18:00', 'avond'],
-		['23:59', 'avond']
+		['00:00', 'other'],
+		['03:59', 'other'],
+		['04:00', 'morning'],
+		['11:59', 'morning'],
+		['12:00', 'other'],
+		['17:59', 'other'],
+		['18:00', 'evening'],
+		['23:59', 'evening']
 	] as const)('%s local is %s', (time, expected) => {
 		expect(getDayPart(brusselsWinter(time), BRUSSELS)).toBe(expected);
 	});
 
-	it('ignores seconds: 11:59:59 is still ochtend', () => {
-		expect(getDayPart('2026-01-15T10:59:59.999Z', BRUSSELS)).toBe('ochtend');
+	it('ignores seconds: 11:59:59 is still morning', () => {
+		expect(getDayPart('2026-01-15T10:59:59.999Z', BRUSSELS)).toBe('morning');
 	});
 });
 
 describe('getDayPart — time zones', () => {
 	it('uses the time zone the reading was taken in, not a fixed one', () => {
 		const instant = '2026-01-15T03:30:00.000Z';
-		expect(getDayPart(instant, 'Europe/Brussels')).toBe('ochtend'); // 04:30
-		expect(getDayPart(instant, 'America/New_York')).toBe('avond'); // 22:30 the day before
-		expect(getDayPart(instant, 'Asia/Tokyo')).toBe('andere'); // 12:30
-		expect(getDayPart(instant, 'UTC')).toBe('andere'); // 03:30
+		expect(getDayPart(instant, 'Europe/Brussels')).toBe('morning'); // 04:30
+		expect(getDayPart(instant, 'America/New_York')).toBe('evening'); // 22:30 the day before
+		expect(getDayPart(instant, 'Asia/Tokyo')).toBe('other'); // 12:30
+		expect(getDayPart(instant, 'UTC')).toBe('other'); // 03:30
 	});
 
 	it('follows daylight saving time (Brussels switches to UTC+2 on 29 March 2026)', () => {
-		expect(getDayPart('2026-03-29T01:59:00.000Z', BRUSSELS)).toBe('andere'); // 03:59 CEST
-		expect(getDayPart('2026-03-29T02:00:00.000Z', BRUSSELS)).toBe('ochtend'); // 04:00 CEST
-		expect(getDayPart('2026-10-25T02:59:00.000Z', BRUSSELS)).toBe('andere'); // 03:59 CET
-		expect(getDayPart('2026-10-25T03:00:00.000Z', BRUSSELS)).toBe('ochtend'); // 04:00 CET
+		expect(getDayPart('2026-03-29T01:59:00.000Z', BRUSSELS)).toBe('other'); // 03:59 CEST
+		expect(getDayPart('2026-03-29T02:00:00.000Z', BRUSSELS)).toBe('morning'); // 04:00 CEST
+		expect(getDayPart('2026-10-25T02:59:00.000Z', BRUSSELS)).toBe('other'); // 03:59 CET
+		expect(getDayPart('2026-10-25T03:00:00.000Z', BRUSSELS)).toBe('morning'); // 04:00 CET
 	});
 });
 
 describe('getDayPart — custom windows', () => {
 	const windows: DayPartWindows = {
-		ochtend: { start: '06:30', end: '09:00' },
-		avond: { start: '20:00', end: '22:15' }
+		morning: { start: '06:30', end: '09:00' },
+		evening: { start: '20:00', end: '22:15' }
 	};
 
 	it.each([
-		['06:29', 'andere'],
-		['06:30', 'ochtend'],
-		['09:00', 'ochtend'],
-		['09:01', 'andere'],
-		['19:59', 'andere'],
-		['20:00', 'avond'],
-		['22:15', 'avond'],
-		['22:16', 'andere']
+		['06:29', 'other'],
+		['06:30', 'morning'],
+		['09:00', 'morning'],
+		['09:01', 'other'],
+		['19:59', 'other'],
+		['20:00', 'evening'],
+		['22:15', 'evening'],
+		['22:16', 'other']
 	] as const)('%s local is %s', (time, expected) => {
 		expect(getDayPart(brusselsWinter(time), BRUSSELS, windows)).toBe(expected);
 	});
@@ -123,8 +123,8 @@ describe('validateDayPartWindows', () => {
 	it('accepts windows that touch but do not overlap', () => {
 		expect(
 			validateDayPartWindows({
-				ochtend: { start: '04:00', end: '11:59' },
-				avond: { start: '12:00', end: '23:59' }
+				morning: { start: '04:00', end: '11:59' },
+				evening: { start: '12:00', end: '23:59' }
 			})
 		).toEqual([]);
 	});
@@ -132,8 +132,8 @@ describe('validateDayPartWindows', () => {
 	it('rejects windows sharing a minute', () => {
 		expect(
 			validateDayPartWindows({
-				ochtend: { start: '04:00', end: '12:00' },
-				avond: { start: '12:00', end: '23:59' }
+				morning: { start: '04:00', end: '12:00' },
+				evening: { start: '12:00', end: '23:59' }
 			})
 		).toEqual([{ kind: 'overlap' }]);
 	});
@@ -141,17 +141,17 @@ describe('validateDayPartWindows', () => {
 	it('rejects a window crossing midnight', () => {
 		expect(
 			validateDayPartWindows({
-				ochtend: DEFAULT_DAY_PART_WINDOWS.ochtend,
-				avond: { start: '22:00', end: '01:00' }
+				morning: DEFAULT_DAY_PART_WINDOWS.morning,
+				evening: { start: '22:00', end: '01:00' }
 			})
-		).toEqual([{ kind: 'end-before-start', part: 'avond' }]);
+		).toEqual([{ kind: 'end-before-start', part: 'evening' }]);
 	});
 
 	it('accepts a one-minute window', () => {
 		expect(
 			validateDayPartWindows({
-				ochtend: { start: '07:00', end: '07:00' },
-				avond: DEFAULT_DAY_PART_WINDOWS.avond
+				morning: { start: '07:00', end: '07:00' },
+				evening: DEFAULT_DAY_PART_WINDOWS.evening
 			})
 		).toEqual([]);
 	});
@@ -159,9 +159,9 @@ describe('validateDayPartWindows', () => {
 	it('rejects malformed times', () => {
 		expect(
 			validateDayPartWindows({
-				ochtend: { start: '4:00', end: '11:59' },
-				avond: DEFAULT_DAY_PART_WINDOWS.avond
+				morning: { start: '4:00', end: '11:59' },
+				evening: DEFAULT_DAY_PART_WINDOWS.evening
 			})
-		).toEqual([{ kind: 'invalid-time', part: 'ochtend', field: 'start' }]);
+		).toEqual([{ kind: 'invalid-time', part: 'morning', field: 'start' }]);
 	});
 });

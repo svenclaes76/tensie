@@ -9,7 +9,7 @@ export interface NewReading {
 	systolic: number;
 	/** mmHg. */
 	diastolic: number;
-	arm?: 'links' | 'rechts';
+	arm?: 'left' | 'right';
 	note?: string;
 }
 

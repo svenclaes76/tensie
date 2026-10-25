@@ -2,8 +2,8 @@ import type { DayPart, DayPartWindows, TimeWindow } from './types';
 
 /** T5 defaults. */
 export const DEFAULT_DAY_PART_WINDOWS: DayPartWindows = {
-	ochtend: { start: '04:00', end: '11:59' },
-	avond: { start: '18:00', end: '23:59' }
+	morning: { start: '04:00', end: '11:59' },
+	evening: { start: '18:00', end: '23:59' }
 };
 
 export interface LocalDateTime {
@@ -78,9 +78,9 @@ export function getDayPart(
 	windows: DayPartWindows = DEFAULT_DAY_PART_WINDOWS
 ): DayPart {
 	const { minutes } = toLocal(measuredAt, timeZone);
-	if (inWindow(minutes, windows.ochtend)) return 'ochtend';
-	if (inWindow(minutes, windows.avond)) return 'avond';
-	return 'andere';
+	if (inWindow(minutes, windows.morning)) return 'morning';
+	if (inWindow(minutes, windows.evening)) return 'evening';
+	return 'other';
 }
 
 export type DayPartWindowError =
@@ -95,7 +95,7 @@ export type DayPartWindowError =
 export function validateDayPartWindows(windows: DayPartWindows): DayPartWindowError[] {
 	const errors: DayPartWindowError[] = [];
 	const ranges: [number, number][] = [];
-	for (const part of ['ochtend', 'avond'] as const) {
+	for (const part of ['morning', 'evening'] as const) {
 		const start = parseTime(windows[part].start);
 		const end = parseTime(windows[part].end);
 		if (start === null) errors.push({ kind: 'invalid-time', part, field: 'start' });

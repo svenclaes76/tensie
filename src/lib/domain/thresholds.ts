@@ -2,8 +2,8 @@ import type { CategoryLimits, Thresholds } from './types';
 
 /** T3 defaults, as used in Bloeddruk.xlsx. */
 export const DEFAULT_THRESHOLDS: Thresholds = {
-	systolic: { licht: 135, gemiddeld: 160, ernstig: 180 },
-	diastolic: { licht: 85, gemiddeld: 100, ernstig: 110 }
+	systolic: { mild: 135, moderate: 160, severe: 180 },
+	diastolic: { mild: 85, moderate: 100, severe: 110 }
 };
 
 export type ThresholdError =
@@ -16,7 +16,7 @@ export type ThresholdError =
 			upper: keyof CategoryLimits;
 	  };
 
-const LIMIT_ORDER: (keyof CategoryLimits)[] = ['licht', 'gemiddeld', 'ernstig'];
+const LIMIT_ORDER: (keyof CategoryLimits)[] = ['mild', 'moderate', 'severe'];
 
 /**
  * T2: each limit must be a positive whole number and strictly higher than the one before.

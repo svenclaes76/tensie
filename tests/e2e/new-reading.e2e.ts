@@ -7,7 +7,7 @@ test.use({ timezoneId: 'Europe/Brussels', viewport: { width: 360, height: 800 } 
 
 test.beforeEach(async ({ page }) => {
 	await page.clock.setFixedTime(NOW);
-	await page.goto('/meting');
+	await page.goto('/new');
 });
 
 /** Readings as stored in IndexedDB. */
@@ -54,7 +54,7 @@ test('saves a reading with the numbers and one tap (C1, C2, H4)', async ({ page 
 			timeZone: 'Europe/Brussels',
 			systolic: 146,
 			diastolic: 88,
-			arm: 'links',
+			arm: 'left',
 			note: 'na koffie',
 			source: 'manual',
 			deleted: false
@@ -113,7 +113,7 @@ test('flags systolic not above diastolic', async ({ page }) => {
 	await expect(page.getByText('Bovendruk niet hoger dan onderdruk')).toBeVisible();
 });
 
-test('shows the fixed doctor/112 line for an ernstig verhoogd value', async ({ page }) => {
+test('shows the fixed doctor/112 line for a severe value', async ({ page }) => {
 	await expect(page.getByText(/bel 112/)).toHaveCount(0);
 	await page.getByLabel('Bovendruk').pressSequentially('185');
 	await expect(page.locator('#sys-cat')).toHaveText('Ernstig verhoogd');

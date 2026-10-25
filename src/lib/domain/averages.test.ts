@@ -57,16 +57,16 @@ describe('summarize', () => {
 		expect(summarize(readings, DEFAULT_THRESHOLDS).systolic).toBe(expected);
 	});
 
-	it('classifies the rounded systolic mean: 134.5 shows as 135 and is licht verhoogd', () => {
+	it('classifies the rounded systolic mean: 134.5 shows as 135 and is mild', () => {
 		const result = summarize(
 			[reading('2026-01-01T08:00', 134, 80), reading('2026-01-02T08:00', 135, 80)],
 			DEFAULT_THRESHOLDS
 		);
 		expect(result.systolic).toBe(135);
-		expect(result.classification?.systolic).toBe('licht verhoogd');
+		expect(result.classification?.systolic).toBe('mild');
 	});
 
-	it('keeps a mean that rounds down below the limit normaal: 134.33 shows as 134', () => {
+	it('keeps a mean that rounds down below the limit normal: 134.33 shows as 134', () => {
 		const result = summarize(
 			[
 				reading('2026-01-01T08:00', 134, 80),
@@ -76,19 +76,19 @@ describe('summarize', () => {
 			DEFAULT_THRESHOLDS
 		);
 		expect(result.systolic).toBe(134);
-		expect(result.classification?.systolic).toBe('normaal');
+		expect(result.classification?.systolic).toBe('normal');
 	});
 
-	it('classifies the rounded diastolic mean: 84.5 shows as 85 and is licht verhoogd', () => {
+	it('classifies the rounded diastolic mean: 84.5 shows as 85 and is mild', () => {
 		const result = summarize(
 			[reading('2026-01-01T08:00', 120, 84), reading('2026-01-02T08:00', 120, 85)],
 			DEFAULT_THRESHOLDS
 		);
 		expect(result.diastolic).toBe(85);
 		expect(result.classification).toEqual({
-			systolic: 'normaal',
-			diastolic: 'licht verhoogd',
-			overall: 'licht verhoogd'
+			systolic: 'normal',
+			diastolic: 'mild',
+			overall: 'mild'
 		});
 	});
 
@@ -132,9 +132,9 @@ describe('monthlyAverages (H3, T6)', () => {
 
 	it('uses every reading in the month, whatever the time of day', () => {
 		const readings = [
-			reading('2026-01-01T08:00', 120, 80), // ochtend
-			reading('2026-01-01T14:00', 150, 95), // andere
-			reading('2026-01-01T21:00', 180, 110) // avond
+			reading('2026-01-01T08:00', 120, 80), // morning
+			reading('2026-01-01T14:00', 150, 95), // other
+			reading('2026-01-01T21:00', 180, 110) // evening
 		];
 		const [month] = monthlyAverages(readings, DEFAULT_THRESHOLDS);
 		expect(month).toMatchObject({ count: 3, systolic: 150, diastolic: 95 });
@@ -162,14 +162,14 @@ describe('monthlyAverages (H3, T6)', () => {
 	it('classifies each monthly average and reclassifies it when thresholds change (T4)', () => {
 		const readings = january(6, 140, 88);
 		const stricter: Thresholds = {
-			systolic: { licht: 125, gemiddeld: 140, ernstig: 170 },
-			diastolic: { licht: 80, gemiddeld: 95, ernstig: 105 }
+			systolic: { mild: 125, moderate: 140, severe: 170 },
+			diastolic: { mild: 80, moderate: 95, severe: 105 }
 		};
 		expect(monthlyAverages(readings, DEFAULT_THRESHOLDS)[0].classification?.overall).toBe(
-			'licht verhoogd'
+			'mild'
 		);
 		expect(monthlyAverages(readings, stricter)[0].classification?.overall).toBe(
-			'gemiddeld verhoogd'
+			'moderate'
 		);
 	});
 
@@ -180,40 +180,40 @@ describe('monthlyAverages (H3, T6)', () => {
 
 describe('dayPartAverages (H3)', () => {
 	const readings = [
-		reading('2026-01-01T03:59', 100, 60), // andere
-		reading('2026-01-01T04:00', 120, 80), // ochtend
-		reading('2026-01-01T11:59', 130, 84), // ochtend
-		reading('2026-01-01T12:00', 110, 70), // andere
-		reading('2026-01-01T18:00', 150, 96), // avond
-		reading('2026-01-01T23:59', 160, 100) // avond
+		reading('2026-01-01T03:59', 100, 60), // other
+		reading('2026-01-01T04:00', 120, 80), // morning
+		reading('2026-01-01T11:59', 130, 84), // morning
+		reading('2026-01-01T12:00', 110, 70), // other
+		reading('2026-01-01T18:00', 150, 96), // evening
+		reading('2026-01-01T23:59', 160, 100) // evening
 	];
 
 	it('averages morning, evening and other readings separately', () => {
 		const result = dayPartAverages(readings, DEFAULT_THRESHOLDS);
-		expect(result.ochtend).toMatchObject({ count: 2, systolic: 125, diastolic: 82 });
-		expect(result.avond).toMatchObject({ count: 2, systolic: 155, diastolic: 98 });
-		expect(result.andere).toMatchObject({ count: 2, systolic: 105, diastolic: 65 });
+		expect(result.morning).toMatchObject({ count: 2, systolic: 125, diastolic: 82 });
+		expect(result.evening).toMatchObject({ count: 2, systolic: 155, diastolic: 98 });
+		expect(result.other).toMatchObject({ count: 2, systolic: 105, diastolic: 65 });
 	});
 
 	it('classifies each day-part average', () => {
 		const result = dayPartAverages(readings, DEFAULT_THRESHOLDS);
-		expect(result.ochtend.classification?.overall).toBe('normaal');
-		expect(result.avond.classification?.overall).toBe('licht verhoogd');
+		expect(result.morning.classification?.overall).toBe('normal');
+		expect(result.evening.classification?.overall).toBe('mild');
 	});
 
 	it('returns an empty summary for a day part without readings', () => {
 		const result = dayPartAverages([reading('2026-01-01T08:00', 120, 80)], DEFAULT_THRESHOLDS);
-		expect(result.avond.count).toBe(0);
-		expect(result.andere.count).toBe(0);
+		expect(result.evening.count).toBe(0);
+		expect(result.other.count).toBe(0);
 	});
 
 	it('uses custom windows', () => {
 		const result = dayPartAverages(readings, DEFAULT_THRESHOLDS, {
-			ochtend: { start: '03:00', end: '04:00' },
-			avond: { start: '12:00', end: '18:00' }
+			morning: { start: '03:00', end: '04:00' },
+			evening: { start: '12:00', end: '18:00' }
 		});
-		expect(result.ochtend.count).toBe(2);
-		expect(result.avond.count).toBe(2);
-		expect(result.andere.count).toBe(2);
+		expect(result.morning.count).toBe(2);
+		expect(result.evening.count).toBe(2);
+		expect(result.other.count).toBe(2);
 	});
 });

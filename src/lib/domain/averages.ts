@@ -74,11 +74,11 @@ export function dayPartAverages(
 	thresholds: Thresholds,
 	windows: DayPartWindows = DEFAULT_DAY_PART_WINDOWS
 ): Record<DayPart, Summary> {
-	const groups: Record<DayPart, ReadingLike[]> = { ochtend: [], avond: [], andere: [] };
+	const groups: Record<DayPart, ReadingLike[]> = { morning: [], evening: [], other: [] };
 	for (const r of live(readings)) groups[getDayPart(r.measuredAt, r.timeZone, windows)].push(r);
 	return {
-		ochtend: summarize(groups.ochtend, thresholds),
-		avond: summarize(groups.avond, thresholds),
-		andere: summarize(groups.andere, thresholds)
+		morning: summarize(groups.morning, thresholds),
+		evening: summarize(groups.evening, thresholds),
+		other: summarize(groups.other, thresholds)
 	};
 }

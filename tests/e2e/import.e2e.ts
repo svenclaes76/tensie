@@ -8,7 +8,7 @@ test.use({ timezoneId: 'Europe/Brussels', viewport: { width: 360, height: 800 } 
 test('imports the sample file, confirms one flagged row, and undoes the import (C9)', async ({
 	page
 }) => {
-	await page.goto('/importeren');
+	await page.goto('/import');
 	await expect(page.getByRole('heading', { name: 'Importeren', level: 1 })).toBeVisible();
 
 	await page.locator('input[type="file"]').setInputFiles(FIXTURE);
@@ -66,7 +66,7 @@ test('imports the sample file, confirms one flagged row, and undoes the import (
 });
 
 test('asks for the columns when a file has unknown headers', async ({ page }) => {
-	await page.goto('/importeren');
+	await page.goto('/import');
 	await page.locator('input[type="file"]').setInputFiles({
 		name: 'metingen.csv',
 		mimeType: 'text/csv',
@@ -86,7 +86,7 @@ test('asks for the columns when a file has unknown headers', async ({ page }) =>
 });
 
 test('rejects a file that is not a spreadsheet', async ({ page }) => {
-	await page.goto('/importeren');
+	await page.goto('/import');
 	await page.locator('input[type="file"]').setInputFiles({
 		name: 'foto.png',
 		mimeType: 'image/png',
