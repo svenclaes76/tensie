@@ -1,2 +1,5 @@
 <!-- Placeholder until the Home screen is built. -->
-<h1>Tensie</h1>
+<main style="padding: 16px">
+	<h1>Tensie</h1>
+	<p><a href="/importeren">Importeren</a></p>
+</main>

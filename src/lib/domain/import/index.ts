@@ -1,4 +1,4 @@
-// Import with `await import('$lib/domain/import')` from the import screen, so SheetJS stays out
+// Import with `await import('#lib/domain/import/index.js')` from the import screen, so SheetJS stays out
 // of the app shell.
 export * from './cells';
 export * from './columns';
