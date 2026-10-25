@@ -34,7 +34,8 @@ export function columnLetter(index: number): string {
 const MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
 const WEEKDAYS = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
 
-function shiftDays(isoDate: string, days: number): string {
+/** "2026-10-25" plus a number of days (negative goes back). */
+export function addDays(isoDate: string, days: number): string {
 	const [year, month, day] = isoDate.split('-').map(Number);
 	return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
 }
@@ -47,7 +48,7 @@ export function formatDayLabel(isoDate: string, today: string): string {
 	const [year, month, day] = isoDate.split('-').map(Number);
 	const dayMonth = `${day} ${MONTHS[month - 1]}`;
 	if (isoDate === today) return `Vandaag, ${dayMonth}`;
-	if (isoDate === shiftDays(today, -1)) return `Gisteren, ${dayMonth}`;
+	if (isoDate === addDays(today, -1)) return `Gisteren, ${dayMonth}`;
 	if (year !== Number(today.slice(0, 4))) return `${dayMonth} ${year}`;
 	const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
 	return `${WEEKDAYS[weekday]} ${dayMonth}`;
@@ -80,6 +81,24 @@ export function formatMonth(isoMonth: string): string {
 	const [year, month] = isoMonth.split('-').map(Number);
 	const name = MONTH_NAMES[month - 1];
 	return `${name[0].toUpperCase()}${name.slice(1)} ${year}`;
+}
+
+/** "25 okt", or "25 okt 2025" with the year. */
+function dayMonth(isoDate: string, withYear: boolean): string {
+	const [year, month, day] = isoDate.split('-').map(Number);
+	return `${day} ${MONTHS[month - 1]}${withYear ? ` ${year}` : ''}`;
+}
+
+/**
+ * A date range as short as it can be: "19–25 okt", "26 sep–25 okt",
+ * "26 okt 2025–25 okt 2026"; a single day is just "25 okt".
+ */
+export function formatDateRange(start: string, end: string): string {
+	if (start === end) return dayMonth(start, false);
+	const sameYear = start.slice(0, 4) === end.slice(0, 4);
+	if (sameYear && start.slice(0, 7) === end.slice(0, 7))
+		return `${Number(start.slice(8))}–${dayMonth(end, false)}`;
+	return `${dayMonth(start, !sameYear)}–${dayMonth(end, !sameYear)}`;
 }
 
 /** "1 meting" / "3 metingen". */

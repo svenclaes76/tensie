@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
 	columnLetter,
+	addDays,
 	countReadings,
 	formatDate,
+	formatDateRange,
 	formatDateTime,
 	formatDayLabel,
 	formatMonth,
@@ -77,5 +79,24 @@ describe('format', () => {
 		expect(countReadings(0)).toBe('0 metingen');
 		expect(countReadings(1)).toBe('1 meting');
 		expect(countReadings(96)).toBe('96 metingen');
+	});
+});
+
+describe('formatDateRange', () => {
+	it.each([
+		['2026-10-19', '2026-10-25', '19–25 okt'],
+		['2026-09-26', '2026-10-25', '26 sep–25 okt'],
+		['2025-10-26', '2026-10-25', '26 okt 2025–25 okt 2026'],
+		['2026-10-25', '2026-10-25', '25 okt']
+	])('%s to %s is %j', (start, end, label) => {
+		expect(formatDateRange(start, end)).toBe(label);
+	});
+});
+
+describe('addDays', () => {
+	it('moves across month, year and leap day', () => {
+		expect(addDays('2026-10-25', -6)).toBe('2026-10-19');
+		expect(addDays('2025-12-31', 1)).toBe('2026-01-01');
+		expect(addDays('2028-02-28', 1)).toBe('2028-02-29');
 	});
 });

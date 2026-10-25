@@ -9,7 +9,7 @@ Personal blood pressure PWA for one user (the owner). Dutch-only interface. Full
 - Dexie (IndexedDB) as the primary data store on the device
 - Supabase (EU region, free plan): Postgres, Auth (email magic link), row-level security
 - SheetJS (`xlsx`) for Excel import/export in the browser
-- uPlot for charts
+- Charts drawn as plain SVG in Svelte (`TrendChart.svelte`), no chart library: the design's category bands, per-point colours and the table view are simplest that way, and a year of readings renders in ~50 ms
 - Vitest for unit tests, Playwright for end-to-end
 
 ## Architecture rules
