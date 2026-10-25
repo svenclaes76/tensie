@@ -36,6 +36,14 @@ export default defineConfig({
 				display: 'standalone',
 				theme_color: '#1F6F66',
 				background_color: '#F6F7F5',
+				// Long-press on the home screen icon opens entry directly.
+				shortcuts: [
+					{
+						name: 'Nieuwe meting',
+						url: '/meting',
+						icons: [{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' }]
+					}
+				],
 				icons: [
 					{ src: '/pwa-64x64.png', sizes: '64x64', type: 'image/png' },
 					{ src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },

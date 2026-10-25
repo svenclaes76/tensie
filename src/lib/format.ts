@@ -31,6 +31,28 @@ export function columnLetter(index: number): string {
 	return letters;
 }
 
+const MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+const WEEKDAYS = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
+
+function shiftDays(isoDate: string, days: number): string {
+	const [year, month, day] = isoDate.split('-').map(Number);
+	return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+}
+
+/**
+ * A day as people say it: "Vandaag, 25 okt", "Gisteren, 24 okt", "do 23 okt",
+ * or "23 okt 2025" for another year.
+ */
+export function formatDayLabel(isoDate: string, today: string): string {
+	const [year, month, day] = isoDate.split('-').map(Number);
+	const dayMonth = `${day} ${MONTHS[month - 1]}`;
+	if (isoDate === today) return `Vandaag, ${dayMonth}`;
+	if (isoDate === shiftDays(today, -1)) return `Gisteren, ${dayMonth}`;
+	if (year !== Number(today.slice(0, 4))) return `${dayMonth} ${year}`;
+	const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+	return `${WEEKDAYS[weekday]} ${dayMonth}`;
+}
+
 /** "1 meting" / "3 metingen". */
 export function countReadings(count: number): string {
 	return `${count} ${count === 1 ? 'meting' : 'metingen'}`;

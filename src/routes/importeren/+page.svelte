@@ -8,14 +8,15 @@
 	import UndoImport from '#lib/components/import/UndoImport.svelte';
 	import { db, type ImportRecord, type Reading } from '#lib/data/db.js';
 	import { listImports, saveImport, undoImport, type SaveImportResult } from '#lib/data/imports.js';
+	import { deviceTimeZone, getSettings } from '#lib/data/settings.js';
 	import { detectColumns } from '#lib/domain/import/columns.js';
 	import { parseRows } from '#lib/domain/import/parse.js';
 	import type { SheetData } from '#lib/domain/import/spreadsheet.js';
 	import { countReadings } from '#lib/format.js';
 	import { emptyDraft, toMapping, type MappingDraft } from '#lib/import/mapping.js';
 
-	// Until the settings screen exists, the file's times are read in the device's time zone.
-	const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	// The file's times are read in the home time zone from settings (the device's until set).
+	let timeZone = $state(deviceTimeZone());
 
 	let fileInput = $state<HTMLInputElement>();
 	let resultHeading = $state<HTMLHeadingElement>();
@@ -73,6 +74,7 @@
 	);
 
 	onMount(async () => {
+		timeZone = (await getSettings(db)).timeZone;
 		history = await listImports(db);
 	});
 

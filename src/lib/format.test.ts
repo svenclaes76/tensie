@@ -4,6 +4,7 @@ import {
 	countReadings,
 	formatDate,
 	formatDateTime,
+	formatDayLabel,
 	formatDecimal,
 	formatTime
 } from './format';
@@ -42,6 +43,22 @@ describe('format', () => {
 		[702, 'AAA']
 	] as const)('column %i is %s', (index, letters) => {
 		expect(columnLetter(index)).toBe(letters);
+	});
+
+	it.each([
+		['2026-10-25', 'Vandaag, 25 okt'],
+		['2026-10-24', 'Gisteren, 24 okt'],
+		['2026-10-22', 'do 22 okt'],
+		['2026-01-01', 'do 1 jan'],
+		['2025-12-31', '31 dec 2025'],
+		['2027-03-01', '1 mrt 2027']
+	])('labels %s as %j when today is 25 October 2026', (date, label) => {
+		expect(formatDayLabel(date, '2026-10-25')).toBe(label);
+	});
+
+	it('knows yesterday across a month and year boundary', () => {
+		expect(formatDayLabel('2026-02-28', '2026-03-01')).toBe('Gisteren, 28 feb');
+		expect(formatDayLabel('2025-12-31', '2026-01-01')).toBe('Gisteren, 31 dec');
 	});
 
 	it('counts readings in Dutch', () => {
