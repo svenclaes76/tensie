@@ -142,7 +142,7 @@ Reviewers needed for Tensie, a personal blood pressure PWA (SvelteKit + Dexie, S
 - [ ] cmHg converted to mmHg (9.8 → 98)
 - [ ] Values stored as text are read correctly
 - [ ] Note column imported ("Start medicatie")
-- [ ] Rows 78 (23/12/2022) and 85 (30/01/2028) flagged for confirmation
+- [ ] Rows 78 (23/12/2022) and 85 (30/01/2028) flagged for confirmation (in `tests/fixtures/sample-import.xlsx`: rows 23 and 43)
 - [ ] Re-importing the same file creates no duplicates; undo removes the whole import
 
 **Edge cases**
