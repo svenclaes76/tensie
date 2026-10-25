@@ -46,7 +46,7 @@ test('saves a reading with the numbers and one tap (C1, C2, H4)', async ({ page 
 	await page.getByLabel('Notitie').fill('na koffie');
 
 	await page.getByRole('button', { name: 'Opslaan' }).click();
-	await expect(page).toHaveURL('/');
+	await expect(page).toHaveURL('/list');
 
 	expect(await stored(page)).toEqual([
 		expect.objectContaining({
@@ -68,7 +68,7 @@ test('Enter moves from bovendruk to onderdruk and saves from there', async ({ pa
 	await expect(page.getByLabel('Onderdruk')).toBeFocused();
 	await page.getByLabel('Onderdruk').pressSequentially('60');
 	await page.keyboard.press('Enter');
-	await expect(page).toHaveURL('/');
+	await expect(page).toHaveURL('/list');
 	expect(await stored(page)).toEqual([expect.objectContaining({ systolic: 95, diastolic: 60 })]);
 });
 
@@ -102,7 +102,7 @@ test('asks for confirmation for implausible values instead of blocking (C4)', as
 
 	await page.getByRole('button', { name: 'Opslaan' }).click();
 	await page.getByRole('button', { name: 'Toch opslaan' }).click();
-	await expect(page).toHaveURL('/');
+	await expect(page).toHaveURL('/list');
 	expect(await stored(page)).toEqual([expect.objectContaining({ systolic: 300, diastolic: 88 })]);
 });
 
@@ -131,7 +131,7 @@ test('a picked time is saved in the device time zone and gets its day part (C1, 
 	await page.getByLabel('Bovendruk').pressSequentially('140');
 	await page.getByLabel('Onderdruk').pressSequentially('85');
 	await page.getByRole('button', { name: 'Opslaan' }).click();
-	await expect(page).toHaveURL('/');
+	await expect(page).toHaveURL('/list');
 	// 21:30 on 24 October was still summer time (UTC+2).
 	expect(await stored(page)).toEqual([
 		expect.objectContaining({ measuredAt: '2026-10-24T19:30:00.000Z' })

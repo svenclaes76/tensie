@@ -5,6 +5,8 @@ import {
 	formatDate,
 	formatDateTime,
 	formatDayLabel,
+	formatMonth,
+	formatShortDay,
 	formatDecimal,
 	formatTime
 } from './format';
@@ -59,6 +61,16 @@ describe('format', () => {
 	it('knows yesterday across a month and year boundary', () => {
 		expect(formatDayLabel('2026-02-28', '2026-03-01')).toBe('Gisteren, 28 feb');
 		expect(formatDayLabel('2025-12-31', '2026-01-01')).toBe('Gisteren, 31 dec');
+	});
+
+	it('formats the list’s short day', () => {
+		expect(formatShortDay('2026-10-25')).toBe('zo 25/10');
+		expect(formatShortDay('2026-01-05')).toBe('ma 05/01');
+	});
+
+	it('formats months in full, capitalised', () => {
+		expect(formatMonth('2026-10')).toBe('Oktober 2026');
+		expect(formatMonth('2025-03')).toBe('Maart 2025');
 	});
 
 	it('counts readings in Dutch', () => {

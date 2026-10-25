@@ -53,6 +53,35 @@ export function formatDayLabel(isoDate: string, today: string): string {
 	return `${WEEKDAYS[weekday]} ${dayMonth}`;
 }
 
+const MONTH_NAMES = [
+	'januari',
+	'februari',
+	'maart',
+	'april',
+	'mei',
+	'juni',
+	'juli',
+	'augustus',
+	'september',
+	'oktober',
+	'november',
+	'december'
+];
+
+/** "2026-10-25" → "zo 25/10", as in the list's date column. */
+export function formatShortDay(isoDate: string): string {
+	const [year, month, day] = isoDate.split('-').map(Number);
+	const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+	return `${WEEKDAYS[weekday]} ${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}`;
+}
+
+/** "2026-10" → "Oktober 2026". */
+export function formatMonth(isoMonth: string): string {
+	const [year, month] = isoMonth.split('-').map(Number);
+	const name = MONTH_NAMES[month - 1];
+	return `${name[0].toUpperCase()}${name.slice(1)} ${year}`;
+}
+
 /** "1 meting" / "3 metingen". */
 export function countReadings(count: number): string {
 	return `${count} ${count === 1 ? 'meting' : 'metingen'}`;

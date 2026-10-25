@@ -11,6 +11,14 @@ export const CATEGORY_LABEL: Record<Category, string> = {
 	severe: 'Ernstig verhoogd'
 };
 
+/** Letter codes in the list's value cells (H1); normal has none. */
+export const CATEGORY_CODE: Record<Category, string> = {
+	normal: '',
+	mild: 'L',
+	moderate: 'G',
+	severe: 'E'
+};
+
 export const DAY_PART_LABEL: Record<DayPart, string> = {
 	morning: 'ochtend',
 	evening: 'avond',

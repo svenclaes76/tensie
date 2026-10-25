@@ -172,8 +172,7 @@
 				...(arm ? { arm } : {}),
 				note
 			});
-			// The list screen does not exist yet; go back to the start.
-			await goto('/');
+			await goto('/list');
 		} catch {
 			error = 'Opslaan is mislukt. Probeer het opnieuw.';
 		} finally {
