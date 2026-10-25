@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { DEFAULT_DAY_PART_WINDOWS } from '../domain/dayPart';
 import { DEFAULT_THRESHOLDS } from '../domain/thresholds';
 import { createDb, type TensieDb } from './db';
-import { addReading } from './readings';
+import { addReading, deleteReading, getReading, restoreReading, updateReading } from './readings';
 import { getSettings } from './settings';
 
 const NOW = new Date('2026-10-25T09:58:30Z');
@@ -107,5 +107,101 @@ describe('getSettings', () => {
 			deleted: false
 		});
 		expect(await getSettings(db)).toMatchObject({ timeZone: 'Europe/Lisbon', thresholds });
+	});
+});
+
+describe('editing and deleting (C7)', () => {
+	const LATER = new Date('2026-10-25T10:30:00Z');
+	const INPUT = {
+		measuredAt: '2026-10-25T08:58:00.000Z',
+		timeZone: 'Europe/Brussels',
+		systolic: 146,
+		diastolic: 88,
+		arm: 'left' as const,
+		note: 'na koffie'
+	};
+
+	it('updates the edited fields and updatedAt, keeping id, source and createdAt', async () => {
+		const original = await addReading(db, INPUT, NOW);
+		const changed = await updateReading(db, original.id, { ...INPUT, systolic: 150 }, LATER);
+		expect(changed).toBe(true);
+		expect(await db.readings.get(original.id)).toEqual({
+			...original,
+			systolic: 150,
+			updatedAt: LATER.toISOString()
+		});
+	});
+
+	it('removes a cleared arm and note', async () => {
+		const original = await addReading(db, INPUT, NOW);
+		await updateReading(db, original.id, { ...INPUT, arm: undefined, note: '  ' }, LATER);
+		const stored = await db.readings.get(original.id);
+		expect(stored).not.toHaveProperty('arm');
+		expect(stored).not.toHaveProperty('note');
+	});
+
+	it('writes nothing when nothing changed', async () => {
+		const original = await addReading(db, INPUT, NOW);
+		expect(await updateReading(db, original.id, { ...INPUT, note: ' na koffie ' }, LATER)).toBe(false);
+		expect((await db.readings.get(original.id))?.updatedAt).toBe(NOW.toISOString());
+	});
+
+	it('keeps an imported reading’s source and import id', async () => {
+		await db.readings.add({
+			id: 'imp',
+			...INPUT,
+			source: 'import',
+			importId: 'import-1',
+			createdAt: NOW.toISOString(),
+			updatedAt: NOW.toISOString(),
+			deleted: false
+		});
+		await updateReading(db, 'imp', { ...INPUT, diastolic: 90 }, LATER);
+		expect(await db.readings.get('imp')).toMatchObject({
+			source: 'import',
+			importId: 'import-1',
+			diastolic: 90
+		});
+	});
+
+	it('refuses malformed values and unknown or deleted readings', async () => {
+		const original = await addReading(db, INPUT, NOW);
+		await expect(updateReading(db, original.id, { ...INPUT, systolic: 0 }, LATER)).rejects.toThrow(
+			RangeError
+		);
+		await expect(updateReading(db, 'nope', INPUT, LATER)).rejects.toThrow('Unknown reading');
+		await deleteReading(db, original.id, LATER);
+		await expect(updateReading(db, original.id, INPUT, LATER)).rejects.toThrow('Unknown reading');
+	});
+
+	it('deletes softly and restores', async () => {
+		const original = await addReading(db, INPUT, NOW);
+		await deleteReading(db, original.id, LATER);
+		expect(await db.readings.get(original.id)).toMatchObject({
+			deleted: true,
+			updatedAt: LATER.toISOString()
+		});
+		expect(await getReading(db, original.id)).toBeUndefined();
+
+		const restoredAt = new Date('2026-10-25T10:30:05Z');
+		await restoreReading(db, original.id, restoredAt);
+		expect(await getReading(db, original.id)).toMatchObject({
+			deleted: false,
+			updatedAt: restoredAt.toISOString(),
+			systolic: 146
+		});
+	});
+
+	it('refuses to delete an unknown or already deleted reading', async () => {
+		const original = await addReading(db, INPUT, NOW);
+		await expect(deleteReading(db, 'nope', LATER)).rejects.toThrow('Unknown reading');
+		await deleteReading(db, original.id, LATER);
+		await expect(deleteReading(db, original.id, LATER)).rejects.toThrow('Unknown reading');
+	});
+
+	it('leaves a live reading untouched when restoring it', async () => {
+		const original = await addReading(db, INPUT, NOW);
+		await restoreReading(db, original.id, LATER);
+		expect((await db.readings.get(original.id))?.updatedAt).toBe(NOW.toISOString());
 	});
 });

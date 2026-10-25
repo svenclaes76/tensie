@@ -47,7 +47,7 @@ Use `tests/fixtures/sample-import.xlsx` (synthetic data, same layout) in tests. 
 - Mobile-first from 360 px, tap targets ≥ 44 px, body text ≥ 16 px, WCAG 2.2 AA.
 - Belgian formats: dd/mm/jjjj, 24-hour time, decimal comma.
 - Category always shown as colour **and** text label.
-- Screens (designs on the Tensie design canvas) and routes: Home `/`, Nieuwe meting `/new`, Lijst `/list`, Grafiek `/chart`, Maandoverzicht `/monthly`, Instellingen `/settings`, Importeren `/import`.
+- Screens (designs on the Tensie design canvas) and routes: Home `/`, Nieuwe meting `/new`, Lijst `/list`, Grafiek `/chart`, Maandoverzicht `/monthly`, Instellingen `/settings`, Importeren `/import`; editing a reading (no design board, reuses the Nieuwe meting form) `/reading/[id]`.
 - Colours: accent #1F6F66, ground #F6F7F5, ink #1B2421. Category badges: normaal #E3F1EE/#1D5E53, licht #FBEFD2/#6B4700, gemiddeld #FBE1D3/#8A2E0B, ernstig #9F1239/#FFFFFF. Font: Atkinson Hyperlegible.
 
 ## Working agreements

@@ -14,7 +14,9 @@ export interface ListReading extends ReadingLike {
 
 export interface ReadingRow {
 	id: string;
-	/** "zo 25/10" on the first reading of a day, null on the others. */
+	/** "zo 25/10", for every reading. */
+	day: string;
+	/** The same, but only on the first reading of a day, null on the others. */
 	dayLabel: string | null;
 	time: string;
 	systolic: number;
@@ -66,10 +68,12 @@ export function buildList(
 			let previousDate: string | null = null;
 			const rows = monthReadings.map((r): ReadingRow => {
 				const local = toLocal(r.measuredAt, r.timeZone);
-				const dayLabel = local.date === previousDate ? null : formatShortDay(local.date);
+				const day = formatShortDay(local.date);
+				const dayLabel = local.date === previousDate ? null : day;
 				previousDate = local.date;
 				return {
 					id: r.id,
+					day,
 					dayLabel,
 					time: formatTime(local.minutes),
 					systolic: r.systolic,

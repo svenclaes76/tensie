@@ -1,14 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
+import { seed, type Seed } from './helpers';
 
 test.use({ timezoneId: 'Europe/Brussels', viewport: { width: 360, height: 800 } });
-
-interface Seed {
-	at: string;
-	systolic: number;
-	diastolic: number;
-	note?: string;
-	deleted?: boolean;
-}
 
 const SEED: Seed[] = [
 	{ at: '2026-10-25T07:42:00+01:00', systolic: 138, diastolic: 86 },
@@ -18,51 +11,6 @@ const SEED: Seed[] = [
 	{ at: '2026-10-22T08:00:00+02:00', systolic: 200, diastolic: 120, deleted: true },
 	{ at: '2026-09-30T07:35:00+02:00', systolic: 120, diastolic: 80 }
 ];
-
-/** Writes readings straight into the app's IndexedDB, then reloads so the list reads them. */
-async function seed(page: Page, readings: Seed[]) {
-	await page.goto('/list');
-	// Wait until the app has opened (and so created) its database.
-	await page.getByText('Nog geen metingen.').waitFor();
-	await page.evaluate(async (rows) => {
-		await new Promise<void>((resolve, reject) => {
-			const open = indexedDB.open('tensie');
-			open.onerror = () => reject(open.error);
-			open.onsuccess = () => {
-				let tx: IDBTransaction;
-				try {
-					tx = open.result.transaction('readings', 'readwrite');
-				} catch (error) {
-					open.result.close();
-					reject(error);
-					return;
-				}
-				const store = tx.objectStore('readings');
-				rows.forEach((r, i) => {
-					const at = new Date(r.at).toISOString();
-					store.put({
-						id: `seed-${i}`,
-						measuredAt: at,
-						timeZone: 'Europe/Brussels',
-						systolic: r.systolic,
-						diastolic: r.diastolic,
-						...(r.note ? { note: r.note } : {}),
-						source: 'manual',
-						createdAt: at,
-						updatedAt: at,
-						deleted: r.deleted ?? false
-					});
-				});
-				tx.oncomplete = () => {
-					open.result.close();
-					resolve();
-				};
-				tx.onerror = () => reject(tx.error);
-			};
-		});
-	}, readings);
-	await page.reload();
-}
 
 function bodyRows(page: Page) {
 	return page.getByRole('table', { name: 'Alle metingen' }).locator('tbody tr');

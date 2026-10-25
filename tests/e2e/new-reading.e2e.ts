@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { stored } from './helpers';
 
 // 25 October 2026, 09:58 in Brussels (CET, the morning the clocks went back).
 const NOW = new Date('2026-10-25T08:58:00Z');
@@ -9,22 +10,6 @@ test.beforeEach(async ({ page }) => {
 	await page.clock.setFixedTime(NOW);
 	await page.goto('/new');
 });
-
-/** Readings as stored in IndexedDB. */
-async function stored(page: Page): Promise<Record<string, unknown>[]> {
-	return page.evaluate(
-		() =>
-			new Promise((resolve, reject) => {
-				const open = indexedDB.open('tensie');
-				open.onerror = () => reject(open.error);
-				open.onsuccess = () => {
-					const request = open.result.transaction('readings').objectStore('readings').getAll();
-					request.onsuccess = () => resolve(request.result);
-					request.onerror = () => reject(request.error);
-				};
-			})
-	);
-}
 
 test('saves a reading with the numbers and one tap (C1, C2, H4)', async ({ page }) => {
 	const systolic = page.getByLabel('Bovendruk');

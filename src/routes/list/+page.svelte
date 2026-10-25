@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { liveQuery } from 'dexie';
 	import { onMount } from 'svelte';
 	import BottomNav from '#lib/components/BottomNav.svelte';
+	import UndoDelete from '#lib/components/UndoDelete.svelte';
 	import { db, type Reading } from '#lib/data/db.js';
 	import { getSettings } from '#lib/data/settings.js';
 	import { DEFAULT_DAY_PART_WINDOWS } from '#lib/domain/dayPart.js';
@@ -110,9 +112,12 @@
 							</td>
 						</tr>
 						{#each group.rows as row (row.id)}
-							<tr class="reading">
+							<!-- The whole row opens the reading; the link in the time cell is the keyboard route. -->
+							<tr class="reading" onclick={() => goto(`/reading/${row.id}`)}>
 								<td class="day">{row.dayLabel ?? ''}</td>
-								<td class="time">{row.time}</td>
+								<td class="time">
+									<a href="/reading/{row.id}" aria-label="Meting van {row.day} {row.time} bewerken">{row.time}</a>
+								</td>
 								<td class="num">
 									<span class="value {row.systolicCategory}">
 										{row.systolic}<span class="code" aria-hidden="true">{CATEGORY_CODE[row.systolicCategory]}</span><span class="visually-hidden">, {CATEGORY_LABEL[row.systolicCategory].toLowerCase()}</span>
@@ -136,6 +141,7 @@
 		{/if}
 	</main>
 
+	<UndoDelete />
 	<BottomNav />
 </div>
 
@@ -320,8 +326,17 @@
 		color: var(--ink);
 	}
 
+	.reading {
+		cursor: pointer;
+	}
+
+	.reading:hover td {
+		background-color: #f7f9f8;
+	}
+
+	/* 44 px rows: the whole row is a tap target (N3). */
 	.reading td {
-		height: 40px;
+		height: 44px;
 		border-bottom: 1px solid #eef0ee;
 	}
 
@@ -331,8 +346,9 @@
 		white-space: nowrap;
 	}
 
-	.time {
+	.time a {
 		color: var(--muted);
+		text-decoration: none;
 	}
 
 	.value {

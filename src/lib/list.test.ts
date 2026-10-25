@@ -39,6 +39,7 @@ describe('buildList (H1)', () => {
 
 	it('shows the day label only on the first reading of a day', () => {
 		expect(list()[0].rows.map((r) => r.dayLabel)).toEqual(['zo 25/10', null, 'za 24/10', null]);
+		expect(list()[0].rows.map((r) => r.day)).toEqual(['zo 25/10', 'zo 25/10', 'za 24/10', 'za 24/10']);
 	});
 
 	it('starts each month with its own day label, even when the day repeats a month earlier', () => {
