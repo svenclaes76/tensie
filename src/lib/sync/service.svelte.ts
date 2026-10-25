@@ -38,7 +38,8 @@ async function getClient(): Promise<SupabaseClient> {
 		// Loaded only when sync is configured, so the app shell stays small.
 		const { createClient } = await import('@supabase/supabase-js');
 		client = createClient(SUPABASE_URL!, SUPABASE_KEY!, {
-			auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+			// Password login only: no redirects back into the app to look for.
+			auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
 		});
 	}
 	return client;
@@ -112,28 +113,22 @@ async function runSync() {
 	}
 }
 
-export type LoginError = 'unknown-email' | 'wrong-code' | 'failed';
+export type LoginError = 'wrong-credentials' | 'too-many-attempts' | 'failed';
 
 /**
- * Sends the login email (P3): a magic link plus a 6-digit code. Only the existing owner account
- * can log in; the app never creates accounts.
+ * Logs in with email and password (P3). Works in an installed iPhone app, unlike an emailed link,
+ * which opens Safari. Only the owner account exists; the app never creates accounts.
  */
-export async function sendLoginEmail(email: string): Promise<LoginError | null> {
+export async function signIn(email: string, password: string): Promise<LoginError | null> {
 	const supabase = await getClient();
-	const { error } = await supabase.auth.signInWithOtp({
-		email,
-		options: { shouldCreateUser: false, emailRedirectTo: `${location.origin}/auth` }
-	});
+	const { error } = await supabase.auth.signInWithPassword({ email, password });
 	if (!error) return null;
-	return /signup|not allowed|not found/i.test(error.message) ? 'unknown-email' : 'failed';
-}
-
-/** Logs in with the code from the email: needed in an installed iPhone app, where the link opens Safari. */
-export async function verifyLoginCode(email: string, code: string): Promise<LoginError | null> {
-	const supabase = await getClient();
-	const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
-	if (!error) return null;
-	return /expired|invalid|token/i.test(error.message) ? 'wrong-code' : 'failed';
+	const code = (error as { code?: string; status?: number }).code;
+	const status = (error as { status?: number }).status;
+	if (code === 'invalid_credentials' || /invalid login credentials/i.test(error.message))
+		return 'wrong-credentials';
+	if (status === 429 || /rate limit|too many/i.test(error.message)) return 'too-many-attempts';
+	return 'failed';
 }
 
 /** Logs out; the readings stay on this device. */

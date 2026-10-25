@@ -27,20 +27,20 @@ readings: they live on the phone and in Supabase.
    - Build output directory: `build`
 3. **Environment variables** (Production, and Preview if you use previews):
    - `NODE_VERSION` = `24`
-   - `VITE_SUPABASE_URL` = your project URL (docs/supabase-setup.md, step 7)
+   - `VITE_SUPABASE_URL` = your project URL (docs/supabase-setup.md, step 5)
    - `VITE_SUPABASE_PUBLISHABLE_KEY` = the publishable key
 
    These are read at build time; after changing one, redeploy.
 4. Save and deploy. The site appears at `https://<project>.pages.dev`.
-5. In Supabase, add the address to **Authentication → URL Configuration**: Site URL
-   `https://<project>.pages.dev` and redirect URL `https://<project>.pages.dev/auth`.
+5. Optionally, set **Authentication → URL Configuration → Site URL** in Supabase to
+   `https://<project>.pages.dev`. Login is by password, so no redirect addresses are needed.
 
 Never put the Supabase secret or `service_role` key in these variables.
 
 ### Own domain (optional)
 
-**Custom domains** → **Set up a custom domain**, for example `tensie.be`. Then update the Site URL
-and redirect URL in Supabase to that domain.
+**Custom domains** → **Set up a custom domain**, for example `tensie.be`. Then update the Site URL in
+Supabase to that domain.
 
 ### Preview deployments
 

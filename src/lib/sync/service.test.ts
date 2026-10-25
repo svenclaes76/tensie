@@ -8,8 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const USER = '11111111-1111-4111-8111-111111111111';
 const auth = {
-	signInWithOtp: vi.fn(),
-	verifyOtp: vi.fn(),
+	signInWithPassword: vi.fn(),
 	signOut: vi.fn(async () => ({ error: null })),
 	getSession: vi.fn(),
 	onAuthStateChange: vi.fn()
@@ -64,34 +63,25 @@ describe('sync service', () => {
 		expect(on.sync.status).toBe('signed-out');
 	});
 
-	it('sends the login email without ever creating an account (P3)', async () => {
+	it('logs in with email and password (P3)', async () => {
 		const service = await loadService();
-		auth.signInWithOtp.mockResolvedValue({ error: null });
-		expect(await service.sendLoginEmail('sven@example.be')).toBeNull();
-		expect(auth.signInWithOtp).toHaveBeenCalledWith({
+		auth.signInWithPassword.mockResolvedValue({ error: null });
+		expect(await service.signIn('sven@example.be', 'correct horse battery staple')).toBeNull();
+		expect(auth.signInWithPassword).toHaveBeenCalledWith({
 			email: 'sven@example.be',
-			options: { shouldCreateUser: false, emailRedirectTo: 'https://tensie.example.be/auth' }
+			password: 'correct horse battery staple'
 		});
 	});
 
 	it.each([
-		['Signups not allowed for otp', 'unknown-email'],
-		['User not found', 'unknown-email'],
-		['Failed to fetch', 'failed']
-	])('reports "%s" as %s', async (message, expected) => {
+		[{ message: 'Invalid login credentials', code: 'invalid_credentials', status: 400 }, 'wrong-credentials'],
+		[{ message: 'Invalid login credentials', status: 400 }, 'wrong-credentials'],
+		[{ message: 'Request rate limit reached', code: 'over_request_rate_limit', status: 429 }, 'too-many-attempts'],
+		[{ message: 'Failed to fetch' }, 'failed']
+	])('reports %j as %s', async (error, expected) => {
 		const service = await loadService();
-		auth.signInWithOtp.mockResolvedValue({ error: { message } });
-		expect(await service.sendLoginEmail('x@example.be')).toBe(expected);
-	});
-
-	it('logs in with the code from the email', async () => {
-		const service = await loadService();
-		auth.verifyOtp.mockResolvedValue({ error: null });
-		expect(await service.verifyLoginCode('sven@example.be', '123456')).toBeNull();
-		expect(auth.verifyOtp).toHaveBeenCalledWith({ email: 'sven@example.be', token: '123456', type: 'email' });
-
-		auth.verifyOtp.mockResolvedValue({ error: { message: 'Token has expired or is invalid' } });
-		expect(await service.verifyLoginCode('sven@example.be', '000000')).toBe('wrong-code');
+		auth.signInWithPassword.mockResolvedValue({ error });
+		expect(await service.signIn('sven@example.be', 'x')).toBe(expected);
 	});
 
 	it('syncs in the background once signed in: a local reading reaches the server', async () => {

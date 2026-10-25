@@ -4,23 +4,22 @@
 	import { formatDateTime, formatTime } from '#lib/format.js';
 	import {
 		requestSync,
-		sendLoginEmail,
+		signIn,
 		signOut,
 		sync,
 		syncConfigured,
-		verifyLoginCode,
 		type LoginError
 	} from '#lib/sync/service.svelte.js';
 
 	const LOGIN_ERROR: Record<LoginError, string> = {
-		'unknown-email': 'Inloggen lukt alleen met het e-mailadres van je Tensie-account.',
-		'wrong-code': 'Die code klopt niet of is verlopen. Vraag een nieuwe mail aan.',
+		'wrong-credentials': 'E-mailadres of wachtwoord klopt niet.',
+		'too-many-attempts': 'Te veel pogingen. Wacht even en probeer het dan opnieuw.',
 		failed: 'Dat lukte niet. Controleer je internetverbinding en probeer het opnieuw.'
 	};
 
 	let email = $state('');
-	let code = $state('');
-	let step = $state<'email' | 'code'>('email');
+	let password = $state('');
+	let showPassword = $state(false);
 	let busy = $state(false);
 	let error = $state<string | null>(null);
 
@@ -52,45 +51,19 @@
 		}
 	});
 
-	async function sendEmail(event: SubmitEvent) {
+	async function submit(event: SubmitEvent) {
 		event.preventDefault();
 		const address = email.trim();
-		if (!/^\S+@\S+\.\S+$/.test(address)) {
-			error = 'Vul een geldig e-mailadres in.';
+		if (!/^S+@S+.S+$/.test(address) || password === '') {
+			error = 'Vul je e-mailadres en wachtwoord in.';
 			return;
 		}
 		busy = true;
 		error = null;
-		const result = await sendLoginEmail(address);
+		const result = await signIn(address, password);
 		busy = false;
 		if (result) error = LOGIN_ERROR[result];
-		else {
-			email = address;
-			step = 'code';
-		}
-	}
-
-	async function submitCode(event: SubmitEvent) {
-		event.preventDefault();
-		if (!/^\d{6,10}$/.test(code)) {
-			error = 'Vul de code uit de mail in.';
-			return;
-		}
-		busy = true;
-		error = null;
-		const result = await verifyLoginCode(email, code);
-		busy = false;
-		if (result) error = LOGIN_ERROR[result];
-		else {
-			code = '';
-			step = 'email';
-		}
-	}
-
-	function otherEmail() {
-		step = 'email';
-		code = '';
-		error = null;
+		else password = '';
 	}
 </script>
 
@@ -104,38 +77,30 @@
 			Meld je aan om je metingen veilig te bewaren en op je andere toestellen te zien. Tot dan staan ze
 			alleen op dit toestel.
 		</p>
-		{#if step === 'email'}
-			<form onsubmit={sendEmail} novalidate>
-				<label for="sync-email">E-mailadres</label>
-				<input id="sync-email" type="email" autocomplete="email" inputmode="email" bind:value={email} />
-				<button type="submit" class="button-primary" disabled={busy}>
-					{busy ? 'Bezig…' : 'Stuur inlogmail'}
-				</button>
-			</form>
-		{:else}
-			<form onsubmit={submitCode} novalidate>
-				<p>
-					We stuurden een mail naar <strong>{email}</strong>. Tik op de link in de mail, of vul hier de
-					code uit de mail in.
-				</p>
-				<label for="sync-code">Code</label>
+		<form onsubmit={submit} novalidate>
+			<label for="sync-email">E-mailadres</label>
+			<input id="sync-email" type="email" autocomplete="username" inputmode="email" bind:value={email} />
+			<label for="sync-password">Wachtwoord</label>
+			<div class="password">
 				<input
-					id="sync-code"
-					inputmode="numeric"
-					autocomplete="one-time-code"
-					pattern="[0-9]*"
-					value={code}
-					oninput={(e) => {
-						code = e.currentTarget.value.replace(/\D/g, '').slice(0, 10);
-						e.currentTarget.value = code;
-					}}
+					id="sync-password"
+					type={showPassword ? 'text' : 'password'}
+					autocomplete="current-password"
+					bind:value={password}
 				/>
-				<button type="submit" class="button-primary" disabled={busy}>
-					{busy ? 'Bezig…' : 'Aanmelden'}
+				<button
+					type="button"
+					class="button-text"
+					aria-pressed={showPassword}
+					onclick={() => (showPassword = !showPassword)}
+				>
+					{showPassword ? 'Verberg' : 'Toon'}<span class="visually-hidden"> wachtwoord</span>
 				</button>
-				<button type="button" class="button-text" onclick={otherEmail}>Ander e-mailadres</button>
-			</form>
-		{/if}
+			</div>
+			<button type="submit" class="button-primary" disabled={busy}>
+				{busy ? 'Bezig…' : 'Aanmelden'}
+			</button>
+		</form>
 		{#if error}
 			<p class="error" role="alert">{error}</p>
 		{/if}
@@ -192,6 +157,16 @@
 		border: 1px solid var(--field-line);
 		background: var(--card);
 		font-size: 17px;
+	}
+
+	.password {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.password input {
+		flex: 1;
 	}
 
 	.error {

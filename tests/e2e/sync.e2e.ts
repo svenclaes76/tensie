@@ -24,14 +24,3 @@ test('entry works without any server', async ({ page }) => {
 	// Nothing leaves the device (P4: no third parties either).
 	expect(requests).toEqual([]);
 });
-
-test('the login page explains when it cannot log in', async ({ page }) => {
-	await page.goto('/auth?code=abc');
-	await expect(page.getByRole('alert')).toContainText('Aanmelden met deze link lukte niet');
-	await expect(page.getByRole('link', { name: 'Naar Instellingen' })).toHaveAttribute('href', '/settings');
-});
-
-test('an expired link shows the same explanation', async ({ page }) => {
-	await page.goto('/auth#error=access_denied&error_description=Email+link+is+invalid+or+has+expired');
-	await expect(page.getByRole('alert')).toContainText('De link is misschien verlopen of al gebruikt');
-});

@@ -196,7 +196,8 @@ describe('syncOnce (N2)', () => {
 		expect(server.tables.get('readings')!.get(id)?.systolic).toBe(160);
 	});
 
-	it('pages through more changes than fit in one request', async () => {
+	// 525 rows through the in-memory IndexedDB of two devices: slow on a cold test run.
+	it('pages through more changes than fit in one request', { timeout: 20_000 }, async () => {
 		const many = Array.from({ length: PAGE_SIZE + 25 }, (_, i) =>
 			addReading(phone, { ...READING, measuredAt: new Date(Date.parse(READING.measuredAt) - i * 60_000).toISOString() }, T('07:00'))
 		);

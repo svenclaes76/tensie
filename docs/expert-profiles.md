@@ -50,7 +50,7 @@ Reviewers needed for Tensie, a personal blood pressure PWA (SvelteKit + Dexie, S
 - RLS enabled and correct on every table (readings, settings and every other synced table)
 - Sign-ups disabled after the owner account exists
 - Only the public (anon/publishable) key in the front end; no service-role key anywhere in the app or repo
-- Auth settings: magic link, TOTP, session lifetime (P3)
+- Auth settings: email and password login, password strength and rate limits, TOTP, session lifetime (P3)
 - Region is EU (P1) and the nightly backup job stores exports privately
 
 **Questions to ask**
