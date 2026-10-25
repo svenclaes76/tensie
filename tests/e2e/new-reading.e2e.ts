@@ -123,6 +123,10 @@ test('a picked time is saved in the device time zone and gets its day part (C1, 
 	]);
 });
 
+test('buttons have complete accessible names', async ({ page }) => {
+	await expect(page.getByRole('button', { name: 'Wijzig tijdstip', exact: true })).toBeVisible();
+});
+
 test('"Nu" goes back to the current time', async ({ page }) => {
 	await page.getByRole('button', { name: /Wijzig/ }).click();
 	await page.getByLabel('Tijd', { exact: true }).fill('14:00');

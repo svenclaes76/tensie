@@ -2,11 +2,26 @@
 	import type { Category } from '#lib/domain/types.js';
 	import { CATEGORY_LABEL } from '#lib/texts.js';
 
-	/** Null shows a neutral "–" (no value yet). */
-	let { category, id }: { category: Category | null; id?: string } = $props();
+	let {
+		category,
+		id,
+		prefix
+	}: {
+		/** Null shows a neutral "–" (no value yet). */
+		category: Category | null;
+		id?: string;
+		/** Which value the badge is about: shown as "B ·", read as "Bovendruk:". */
+		prefix?: { short: string; full: string };
+	} = $props();
 </script>
 
-<span {id} class="badge {category ?? 'none'}">{category ? CATEGORY_LABEL[category] : '–'}</span>
+<span {id} class="badge {category ?? 'none'}"
+	><!-- Whitespace next to {#if} is trimmed, hence the explicit {' '}. -->{#if prefix}<span
+			aria-hidden="true">{prefix.short} ·{' '}</span
+		><span class="visually-hidden">{prefix.full}:{' '}</span>{/if}{category
+		? CATEGORY_LABEL[category]
+		: '–'}</span
+>
 
 <style>
 	.badge {

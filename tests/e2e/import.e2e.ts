@@ -60,7 +60,7 @@ test('imports the sample file, confirms one flagged row, and undoes the import (
 	await expect(history.getByText(/Ongedaan gemaakt op/)).toBeVisible();
 
 	// After undo the file imports as new again.
-	await page.getByRole('button', { name: /Ander/ }).click();
+	await page.getByRole('button', { name: 'Ander bestand kiezen', exact: true }).click();
 	await page.locator('input[type="file"]').setInputFiles(FIXTURE);
 	await expect(page.getByRole('button', { name: '94 metingen importeren' })).toBeEnabled();
 });

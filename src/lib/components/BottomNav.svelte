@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 
-	// Tabs are added here as their screens are built (Maand /monthly next).
 	const tabs = [
 		{
 			href: '/',
@@ -17,6 +16,11 @@
 			href: '/chart',
 			label: 'Grafiek',
 			icon: '<path d="M3 3v18h18"></path><path d="m6 15 4-4 3 3 6-7"></path>'
+		},
+		{
+			href: '/monthly',
+			label: 'Maand',
+			icon: '<rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path>'
 		}
 	];
 </script>
